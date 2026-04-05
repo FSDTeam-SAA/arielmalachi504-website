@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="he" dir="ltr">
       <body className={`${poppins.variable} antialiased`}>
         <MainProviders>
           <Provider> {children} </Provider>
