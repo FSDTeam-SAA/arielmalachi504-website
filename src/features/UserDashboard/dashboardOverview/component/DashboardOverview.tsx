@@ -95,7 +95,7 @@ export default function DashboardOverview() {
   const router = useRouter();
 
   return (
-    <section className="min-h-screen bg-[#edf6fb] p-4 md:p-6">
+    <section className="min-h-screen p-4 md:p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-10">
           <h2 className="mb-4 text-[22px] font-medium text-[#666]">
