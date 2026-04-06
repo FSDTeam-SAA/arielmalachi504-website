@@ -1,9 +1,7 @@
 import Banner from "@/features/website/component/Banner";
-import Slider from "@/features/website/component/Slider";
-import FeaturesSection from "@/features/website/component/FeaturesSection";
-import HowItWorksSection from "@/features/website/component/HowItWorksSection";
 import PricingSection from "@/features/website/component/PricingSection";
 import FAQSection from "@/features/website/component/FAQSection";
+import CTASection from "@/features/website/component/CTASection";
 
 export default function Home() {
   return (
@@ -15,6 +13,7 @@ export default function Home() {
         <HowItWorksSection /> */}
         <PricingSection />
         <FAQSection />
+        <CTASection />
       </div>
     </div>
   );
