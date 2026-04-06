@@ -62,7 +62,7 @@ export default function FAQSection() {
             viewport={{ once: true }}
             className="text-4xl md:text-5xl font-black text-[#1a2b4b] mb-6"
           >
-            כל מה שאתה <span className="text-[#00F6FF]">צריך לדעת</span>
+            כל מה שאתה <span className="">צריך לדעת</span>
           </motion.h2>
 
           <motion.p

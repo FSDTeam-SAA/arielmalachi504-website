@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 
 const navLinks = [
   { title: "בית", href: "/" },
@@ -20,8 +20,7 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo Section - Now on the Left in LTR */}
-
+          {/* Logo */}
           <div className="flex items-center justify-center">
             <Image
               src="/images/logo.png"
@@ -32,7 +31,7 @@ export default function Navbar() {
             />
           </div>
 
-          {/* Navigation Links - Centered, ordered Home to Pricing */}
+          {/* Nav Links */}
           <div className="hidden md:flex items-center justify-center flex-1 gap-8">
             {navLinks.map((link) => (
               <Link
@@ -45,25 +44,24 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Action Buttons - Now on the Right in LTR */}
+          {/* Buttons */}
           <div className="flex items-center gap-4">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <Link
+              href={"/sign-up"}
               className="bg-white border-2 border-[#00F6FF] text-[#4481EB] px-8 py-2.5 rounded-xl font-bold text-lg hover:bg-cyan-50 transition-all duration-300 cursor-pointer"
             >
               הירשם
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            </Link>
+
+            <Link
+              href="/login"
               className="bg-gradient-to-r from-[#00F6FF] to-[#4481EB] text-white px-8 py-2.5 rounded-xl font-bold text-lg shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 cursor-pointer"
             >
               היכנס
-            </motion.button>
+            </Link>
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu */}
           <div className="md:hidden flex items-center">
             <button className="text-gray-600 p-2">
               <svg

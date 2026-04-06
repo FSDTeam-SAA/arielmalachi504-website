@@ -10,7 +10,7 @@ const stats = [
 
 export default function Banner() {
   return (
-    <section className="relative overflow-hidden bg-white py-14 lg:py-24 pt-[160px]">
+    <section className="relative overflow-hidden bg-white py-14 lg:py-24 pt-[60px]">
       {/* Background Decorative Blobs - Subtle as per screenshot */}
       <div className="absolute top-0 left-0 -translate-x-1/4 translate-y-1/4 w-[500px] h-[500px] bg-purple-50/40 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 w-[500px] h-[500px] bg-cyan-50/40 rounded-full blur-[120px] pointer-events-none" />
