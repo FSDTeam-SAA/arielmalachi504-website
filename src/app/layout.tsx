@@ -12,7 +12,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "sktch Labs",
+  title: "Crafted Ad",
   description:
     "Design amazing digital experiences that create more happy in the world.",
 };
@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="he" dir="ltr">
       <body className={`${poppins.variable} antialiased`}>
         <MainProviders>
           <Provider> {children} </Provider>
