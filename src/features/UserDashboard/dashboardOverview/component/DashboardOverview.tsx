@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Monitor,
   FileText,
@@ -53,6 +54,7 @@ const services = [
     buttonClass: "bg-[#4e86f7] hover:bg-[#3f77e8]",
     titleClass: "text-[#4e86f7]",
     borderClass: "border-[#cfe2ff]",
+    path: "/dashboard-overview/poster-design",
   },
   {
     title: "Logo Maker",
@@ -63,6 +65,7 @@ const services = [
     buttonClass: "bg-[#20cbe3] hover:bg-[#17bdd4]",
     titleClass: "text-[#20cbe3]",
     borderClass: "border-[#d7f6fb]",
+    path: "/dashboard-overview/logo-maker",
   },
   {
     title: "Subscription",
@@ -73,6 +76,7 @@ const services = [
     buttonClass: "bg-[#e8bf12] hover:bg-[#d8b00e]",
     titleClass: "text-[#e8bf12]",
     borderClass: "border-[#f3e6b3]",
+    path: "/billing-payments",
   },
   {
     title: "Account Settings",
@@ -83,14 +87,16 @@ const services = [
     buttonClass: "bg-[#6f6f6f] hover:bg-[#5f5f5f]",
     titleClass: "text-[#666666]",
     borderClass: "border-[#dddddd]",
+    path: "/settings",
   },
 ];
 
 export default function DashboardOverview() {
+  const router = useRouter();
+
   return (
     <section className="min-h-screen bg-[#edf6fb] p-4 md:p-6">
       <div className="mx-auto max-w-7xl">
-        {/* Dashboard Overview */}
         <div className="mb-10">
           <h2 className="mb-4 text-[22px] font-medium text-[#666]">
             Dashboard Overview
@@ -120,7 +126,6 @@ export default function DashboardOverview() {
           </div>
         </div>
 
-        {/* Profile Overview */}
         <div className="mb-10">
           <h2 className="mb-4 text-[22px] font-medium text-[#666]">
             Profile Overview
@@ -165,7 +170,6 @@ export default function DashboardOverview() {
           </div>
         </div>
 
-        {/* Available Services */}
         <div>
           <h2 className="mb-4 text-[22px] font-medium text-[#666]">
             Available Services
@@ -194,7 +198,8 @@ export default function DashboardOverview() {
                   </p>
 
                   <button
-                    className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium text-white transition ${item.buttonClass}`}
+                    onClick={() => router.push(item.path)}
+                    className={`mt-5 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium text-white transition ${item.buttonClass}`}
                   >
                     Open
                     <ArrowRight className="h-4 w-4" />
