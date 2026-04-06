@@ -3,16 +3,18 @@ import Slider from "@/features/website/component/Slider";
 import FeaturesSection from "@/features/website/component/FeaturesSection";
 import HowItWorksSection from "@/features/website/component/HowItWorksSection";
 import PricingSection from "@/features/website/component/PricingSection";
+import FAQSection from "@/features/website/component/FAQSection";
 
 export default function Home() {
   return (
-    <div className="bg-white">
+    <div className="flex flex-col">
       <Banner />
-      <Slider />
-      <div className="space-y-20">
-        <FeaturesSection />
-        <HowItWorksSection />
+      {/* <Slider /> */}
+      <div className="space-y-10">
+        {/* <FeaturesSection />
+        <HowItWorksSection /> */}
         <PricingSection />
+        <FAQSection />
       </div>
     </div>
   );
