@@ -48,7 +48,7 @@ export default function SignUp() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label className="mb-2 block text-[15px] text-[#6b7280]">
-              שם משפחה
+              שם פרטי
             </label>
             <input
               name="lastName"
@@ -62,7 +62,7 @@ export default function SignUp() {
 
           <div>
             <label className="mb-2 block text-[15px] text-[#6b7280]">
-              שם פרטי
+              שם משפחה
             </label>
             <input
               name="firstName"

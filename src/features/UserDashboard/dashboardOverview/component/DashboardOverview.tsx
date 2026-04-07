@@ -96,7 +96,7 @@ export default function DashboardOverview() {
 
   return (
     <section className="min-h-screen p-4 md:p-6">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto container">
         <div className="mb-10">
           <h2 className="mb-4 text-[22px] font-medium text-[#666]">
             Dashboard Overview
