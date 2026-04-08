@@ -19,3 +19,26 @@ export interface ILoginResponse {
   message: string;
   data: IAuthData;
 }
+
+export interface IRegisterRequest {
+  name: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
+export interface IRegisterResponse {
+  status: boolean;
+  message: string;
+  data: unknown;
+}
+
+export interface IForgetPasswordRequest {
+  email: string;
+}
+
+export interface IForgetPasswordResponse {
+  status: boolean;
+  message: string;
+  data: unknown;
+}
