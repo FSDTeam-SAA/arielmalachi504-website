@@ -6,16 +6,19 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useUserProfileSettings } from "@/features/UserDashboard/settings/hooks/useSettings";
 import { Sparkles, LayoutDashboard } from "lucide-react";
+import { useTranslation } from "@/locales";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const navLinks = [
-  { title: "בית", href: "/" },
-  { title: "תכונות", href: "#features" },
-  { title: "איך זה עובד", href: "#how-it-works" },
-  { title: "תמחור", href: "#pricing" },
-];
+  { titleKey: "home", href: "/" },
+  { titleKey: "features", href: "#features" },
+  { titleKey: "howItWorks", href: "#how-it-works" },
+  { titleKey: "pricing", href: "#pricing" },
+] as const;
 
 export default function Navbar() {
-  const { data: session, status } = useSession();
+  const { t } = useTranslation();
+  const { status } = useSession();
   const { data: profileData } = useUserProfileSettings();
   const credits = profileData?.data?.credits || 0;
 
@@ -46,13 +49,15 @@ export default function Navbar() {
                 href={link.href}
                 className="text-[#4481EB] hover:text-[#00F6FF] font-medium transition-colors duration-200 text-lg"
               >
-                {link.title}
+                {t.navbar[link.titleKey]}
               </Link>
             ))}
           </div>
 
           {/* Buttons */}
           <div className="flex items-center gap-3 lg:gap-4">
+            <LanguageSwitcher />
+
             {status === "authenticated" ? (
               <>
                 {/* Credits Balance */}
@@ -70,7 +75,7 @@ export default function Navbar() {
                   className="bg-gradient-to-r from-[#00F6FF] to-[#4481EB] text-white px-5 lg:px-7 py-2.5 rounded-xl font-bold text-base lg:text-lg shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 cursor-pointer flex items-center gap-2"
                 >
                   <LayoutDashboard className="w-4 h-4 lg:w-5 lg:h-5" />
-                  לוח בקרה
+                  {t.common.dashboard}
                 </Link>
               </>
             ) : (
@@ -79,14 +84,14 @@ export default function Navbar() {
                   href={"/sign-up"}
                   className="bg-white border-2 border-[#00F6FF] text-[#4481EB] px-8 py-2.5 rounded-xl font-bold text-lg hover:bg-cyan-50 transition-all duration-300 cursor-pointer"
                 >
-                  הירשם
+                  {t.common.signup}
                 </Link>
 
                 <Link
                   href="/login"
                   className="bg-gradient-to-r from-[#00F6FF] to-[#4481EB] text-white px-8 py-2.5 rounded-xl font-bold text-lg shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 cursor-pointer"
                 >
-                  היכנס
+                  {t.common.login}
                 </Link>
               </>
             )}

@@ -3,8 +3,11 @@
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import Image from "next/image";
+import { useTranslation } from "@/locales";
 
 export default function Design() {
+  const { t } = useTranslation();
+
   return (
     <section className="bg-white py-4 overflow-hidden">
       <div className="mx-auto container px-4">
@@ -18,16 +21,15 @@ export default function Design() {
         >
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#dbd7ff] bg-white px-5 py-2 text-sm font-medium text-[#6c63ff] shadow-sm">
             <Sparkles className="h-4 w-4" />
-            <span className="text-[16px]">Design</span>
+            <span className="text-[16px]">{t.design.badge}</span>
           </div>
 
           <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-[#1a1c3d] sm:text-5xl">
-            AI Crafted Designs
+            {t.design.title}
           </h2>
 
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-[#6b7280]">
-            Explore stunning posters, logos, and graphics created instantly by
-            our AI.
+            {t.design.subtitle}
           </p>
         </motion.div>
 

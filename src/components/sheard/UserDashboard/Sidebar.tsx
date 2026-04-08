@@ -14,33 +14,35 @@ import {
   X,
   AlertCircle,
 } from "lucide-react";
-
-const menuItems = [
-  {
-    title: "סקירה כללית של לוח המחוונים",
-    icon: <LayoutGrid className="w-5 h-5" />,
-    href: "/dashboard-overview",
-  },
-  {
-    title: "העיצובים שלי",
-    icon: <Palette className="w-5 h-5" />,
-    href: "/my-designs",
-  },
-  {
-    title: "חיוב ותשלומים",
-    icon: <CreditCard className="w-5 h-5" />,
-    href: "/billing-payments",
-  },
-  {
-    title: "הגדרות",
-    icon: <Settings className="w-5 h-5" />,
-    href: "/settings",
-  },
-];
+import { useTranslation } from "@/locales";
 
 export default function Sidebar() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const menuItems = [
+    {
+      title: t.sidebar.overview,
+      icon: <LayoutGrid className="w-5 h-5" />,
+      href: "/dashboard-overview",
+    },
+    {
+      title: t.sidebar.myDesigns,
+      icon: <Palette className="w-5 h-5" />,
+      href: "/my-designs",
+    },
+    {
+      title: t.sidebar.billing,
+      icon: <CreditCard className="w-5 h-5" />,
+      href: "/billing-payments",
+    },
+    {
+      title: t.sidebar.settings,
+      icon: <Settings className="w-5 h-5" />,
+      href: "/settings",
+    },
+  ];
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/" });
@@ -96,7 +98,7 @@ export default function Sidebar() {
             className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition-all duration-300 group cursor-pointer"
           >
             <LogOut className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" />
-            <span className="text-lg font-bold">התנתק</span>
+            <span className="text-lg font-bold">{t.sidebar.logout}</span>
           </button>
         </div>
       </div>
@@ -124,9 +126,11 @@ export default function Sidebar() {
                 <AlertCircle className="h-8 w-8 text-red-500" />
               </div>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Log Out</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                {t.logoutModal.title}
+              </h3>
               <p className="text-gray-500 mb-8 max-w-[280px]">
-                Are you sure you want to log out of your account?
+                {t.logoutModal.message}
               </p>
 
               <div className="flex w-full gap-3">
@@ -135,14 +139,14 @@ export default function Sidebar() {
                   onClick={() => setShowLogoutModal(false)}
                   className="flex-1 px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors cursor-pointer"
                 >
-                  Cancel
+                  {t.logoutModal.cancel}
                 </button>
                 <button
                   type="button"
                   onClick={handleLogout}
                   className="flex-1 px-4 py-3 text-sm font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-shadow shadow-lg shadow-red-500/20 cursor-pointer"
                 >
-                  Confirm Log Out
+                  {t.logoutModal.confirm}
                 </button>
               </div>
             </div>

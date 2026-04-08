@@ -3,8 +3,11 @@
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import Image from "next/image";
+import { useTranslation } from "@/locales";
 
 export default function Creation() {
+  const { t } = useTranslation();
+
   return (
     <section
       dir="rtl"
@@ -21,15 +24,15 @@ export default function Creation() {
         >
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#dbd7ff] bg-white px-5 py-2 text-sm font-medium text-[#6c63ff] shadow-sm">
             <Sparkles className="h-4 w-4" />
-            יצירה
+            {t.creation.badge}
           </div>
 
           <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-[#1a1c3d] sm:text-5xl">
-            צור פוסטרים ולוגו בשניות
+            {t.creation.title}
           </h2>
 
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-[#6b7280]">
-            הפוך את הרעיונות שלך לפוסטרים מקצועיים ולוגו ייחודי עם העוצמה של AI.
+            {t.creation.subtitle}
           </p>
         </motion.div>
 
@@ -74,7 +77,7 @@ export default function Creation() {
             </div>
           </motion.div>
 
-          {/* Text Column (on the right in RTL) */}
+          {/* Text Column */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -83,21 +86,15 @@ export default function Creation() {
             className="order-1 lg:order-2 text-right"
           >
             <h3 className="mb-8 text-3xl font-extrabold leading-[1.3] text-transparent bg-clip-text bg-gradient-to-r from-[#21c0ff] to-[#4c73ff] md:text-5xl">
-              הבא את הרעיונות שלך לחיים עם עיצובי פוסטרים ולוגו המופעלים על ידי
-              בינה מלאכותית
+              {t.creation.heading}
             </h3>
 
             <p className="mb-10 text-[17px] leading-relaxed text-[#6b7280]">
-              יצירת פוסטרים מושכי עין ולוגו בלתי נשכח כבר לא דורשת כלי עיצוב
-              מורכבים או ניסיון מקצועי. הפלטפורמה ה-AI שלנו מאפשרת לך להפוך
-              רעיונות פשוטים לעיצובים מדהימים מבחינה ויזואלית תוך שניות. פשוט
-              תאר את הפוסטר או הלוגו שאתה רוצה, בחר את הצבעים, הסגנון והגודל
-              המועדפים עליך, ואפשר למערכת ליצור עיצובים יצירתיים המותאמים לצרכים
-              שלך.
+              {t.creation.body}
             </p>
 
             <button className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#22cafe] to-[#4e74ff] px-10 py-4 text-lg font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-105 hover:opacity-95 active:scale-95 cursor-pointer">
-              צור את העיצוב שלך
+              {t.creation.cta}
             </button>
           </motion.div>
         </div>

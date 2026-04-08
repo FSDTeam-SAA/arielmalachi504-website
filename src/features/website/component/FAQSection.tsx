@@ -3,43 +3,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Sparkles } from "lucide-react";
-
-const faqs = [
-  {
-    question: "מהי מודעת Craft?",
-    answer:
-      "מודעת Craft היא פתרון פרסום חכם המבוסס על בינה מלאכותית, המאפשר לכם ליצור עיצובים גרפיים, פוסטרים ולוגו מותאמים אישית לצרכי העסק שלכם בצורה מהירה ומקצועית.",
-  },
-  {
-    question: "איך אני יוצר עיצוב פוסטרים ולוגו שונים?",
-    answer:
-      "פשוט תארו את מה שאתם רוצים בתיבת הטקסט, בחרו את הסגנון המועדף עליכם וה-AI שלנו יפיק עבורכם מגוון רחב של אפשרויות עיצוב לבחירה תוך שניות.",
-  },
-  {
-    question: "איך ה-AI מייצר את העיצובים שלי??",
-    answer:
-      "הטכנולוגיה שלנו מנתחת את הטקסט והדרישות שלכם ומשתמשת במודלים מתקדמים של עיצוב גרפי כדי ליצור קומפוזיציות, צבעים וצורות שמתאימים בדיוק למותג שלכם.",
-  },
-  {
-    question:
-      "האם אני יכול להתאים אישית את הצבעים, הגודל והסגנון של העיצוב שלי?",
-    answer:
-      "בהחלט! לאחר שה-AI יוצר את העיצוב הראשוני, תוכלו להשתמש בכלי העריכה שלנו כדי לשנות צבעים, גופנים, גדלים ולהוסיף אלמנטים נוספים כרצונכם.",
-  },
-  {
-    question: "באילו פורמטים אני יכול להוריד את העיצובים שלי??",
-    answer:
-      "ניתן להוריד את העיצובים בפורמטים פופולריים כמו PNG, JPG, SVG לשימוש דיגיטלי, ואף בפורמט PDF להדפסה באיכות גבוהה.",
-  },
-  {
-    question: "איך המנוי עובד??",
-    answer:
-      "אנחנו מציעים תוכניות גמישות הכוללות גישה ללא הגבלה לכלי ה-AI שלנו. ניתן לבחור בין מנוי חודשי או שנתי, עם אפשרות לביטול בכל עת.",
-  },
-];
+import { useTranslation } from "@/locales";
 
 export default function FAQSection() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const { t } = useTranslation();
 
   return (
     <section id="faq" className="py-20 bg-white overflow-hidden">
@@ -53,7 +21,7 @@ export default function FAQSection() {
             className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-100 bg-blue-50/50 text-blue-600 mb-6"
           >
             <Sparkles className="w-4 h-4" />
-            <span className="text-sm font-bold">שאלות נפוצות</span>
+            <span className="text-sm font-bold">{t.faq.badge}</span>
           </motion.div>
 
           <motion.h2
@@ -62,7 +30,7 @@ export default function FAQSection() {
             viewport={{ once: true }}
             className="text-4xl md:text-5xl font-black text-[#1a2b4b] mb-6"
           >
-            כל מה שאתה <span className="">צריך לדעת</span>
+            {t.faq.title} <span className="">{t.faq.titleHighlight}</span>
           </motion.h2>
 
           <motion.p
@@ -72,14 +40,13 @@ export default function FAQSection() {
             transition={{ delay: 0.1 }}
             className="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed"
           >
-            קבל תשובות מהירות על פוסטרים, לוגו ועיצובים שנוצרו על ידי בינה
-            מלאכותית.
+            {t.faq.subtitle}
           </motion.p>
         </div>
 
         {/* Accordion Items */}
         <div className="max-w-6xl mx-auto flex flex-col gap-4">
-          {faqs.map((faq, index) => {
+          {t.faq.items.map((faq, index) => {
             const isOpen = activeIndex === index;
 
             return (

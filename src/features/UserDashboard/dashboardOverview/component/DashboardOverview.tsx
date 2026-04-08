@@ -14,6 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useUserProfileSettings } from "../../settings/hooks/useSettings";
+import { useTranslation } from "@/locales";
 
 const stats = [
   {
@@ -94,6 +95,7 @@ const services = [
 ];
 
 export default function DashboardOverview() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { data, isLoading, isError } = useUserProfileSettings();
   const profile = data?.data;
@@ -103,7 +105,7 @@ export default function DashboardOverview() {
       <div className="mx-auto container">
         <div className="mb-10">
           <h2 className="mb-4 text-[22px] font-medium text-[#666]">
-            Dashboard Overview
+            {t.dashboardOverview.profileTitle}
           </h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -132,7 +134,7 @@ export default function DashboardOverview() {
 
         <div className="mb-10">
           <h2 className="mb-4 text-[22px] font-medium text-[#666]">
-            Profile Overview
+            {t.dashboardOverview.profileTitle}
           </h2>
 
           <div className="rounded-lg border border-[#e2edf4] bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.03)] min-h-[160px] flex items-center justify-center">
@@ -182,7 +184,9 @@ export default function DashboardOverview() {
                       {profile.isSubscribed && (
                         <BadgeCheck className="h-3 w-3 fill-[#2e9b48] text-[#2e9b48]" />
                       )}
-                      {profile.isSubscribed ? "Active" : "Inactive"}
+                      {profile.isSubscribed
+                        ? t.dashboardOverview.active
+                        : t.dashboardOverview.inactive}
                     </span>
                   </div>
 
@@ -191,8 +195,8 @@ export default function DashboardOverview() {
                     className="mt-5 rounded-md bg-[#22c8ea] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#18bbdc]"
                   >
                     {profile.isSubscribed
-                      ? "Manage Subscription"
-                      : "Upgrade Plan"}
+                      ? t.dashboardOverview.manageSub
+                      : t.dashboardOverview.upgrade}
                   </button>
                 </div>
               </div>

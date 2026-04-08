@@ -4,8 +4,12 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useUserProfileSettings } from "@/features/UserDashboard/settings/hooks/useSettings";
 import { Sparkles, Plus } from "lucide-react";
+import { useTranslation } from "@/locales";
+import LanguageSwitcher from "../LanguageSwitcher";
+import Link from "next/link";
 
 export default function Header() {
+  const { t } = useTranslation();
   const { data: session } = useSession();
   const user = session?.user;
   const { data: profileData } = useUserProfileSettings();
@@ -21,18 +25,23 @@ export default function Header() {
   };
 
   return (
-    <div className="w-full h-full bg-white border-b border-gray-100 flex items-center justify-end px-6 lg:px-10">
+    <div className="w-full h-full bg-white border-b border-gray-100 flex items-center justify-end px-6 lg:px-10 gap-3 sm:gap-6">
+      <LanguageSwitcher />
+
       {/* Credits Balance */}
-      <div className="flex items-center gap-2 lg:gap-3 bg-[#EEF2FF] border border-indigo-200 rounded-full p-1.5 mr-4 lg:mr-8 h-[44px] lg:h-[48px]">
+      <div className="flex items-center gap-2 lg:gap-3 bg-[#EEF2FF] border border-indigo-200 rounded-full p-1.5 h-[44px] lg:h-[48px]">
         <div className="bg-indigo-500 w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center text-white shadow-sm">
           <Sparkles className="w-4 h-4 lg:w-5 lg:h-5" />
         </div>
         <span className="text-[#1E293B] font-bold text-sm lg:text-lg whitespace-nowrap px-1">
-          {new Intl.NumberFormat().format(credits)} Credits
+          {new Intl.NumberFormat().format(credits)} {t.dashboardHeader.credits}
         </span>
-        <button className="bg-indigo-500 w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center text-white transition hover:bg-indigo-600 shadow-sm cursor-pointer">
+        <Link
+          href="/billing-payments"
+          className="bg-indigo-500 w-8 h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center text-white transition hover:bg-indigo-600 shadow-sm cursor-pointer"
+        >
           <Plus className="w-4 h-4 lg:w-5 lg:h-5" />
-        </button>
+        </Link>
       </div>
 
       {/* User Profile */}

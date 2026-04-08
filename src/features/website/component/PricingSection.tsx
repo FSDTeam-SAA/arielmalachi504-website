@@ -10,8 +10,10 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { isAxiosError } from "axios";
+import { useTranslation } from "@/locales";
 
 export default function PricingSection() {
+  const { t } = useTranslation();
   const { data, isLoading } = useSubscriptionPlans();
   const { status } = useSession();
   const router = useRouter();
@@ -19,7 +21,7 @@ export default function PricingSection() {
 
   const handleSubscribe = async (planId: string) => {
     if (status === "unauthenticated") {
-      toast.error("אנא התחבר כדי לרכוש חבילה");
+      toast.error(t.pricing.loginError);
       router.push("/login");
       return;
     }
@@ -29,15 +31,15 @@ export default function PricingSection() {
         if (response?.data?.sessionUrl) {
           window.location.href = response.data.sessionUrl;
         } else {
-          toast.success("המנוי בוצע בהצלחה!");
+          toast.success(t.pricing.success);
           router.push("/dashboard-overview");
         }
       },
       onError: (error: unknown) => {
         if (isAxiosError(error)) {
-          toast.error(error.response?.data?.message || "נכשל בביצוע המנוי");
+          toast.error(error.response?.data?.message || t.pricing.error);
         } else {
-          toast.error("אירעה שגיאה בלתי צפויה");
+          toast.error(t.pricing.unexpectedError);
         }
       },
     });
@@ -61,17 +63,20 @@ export default function PricingSection() {
       const translatedName = nameMapping[plan.name.toLowerCase()] || plan.name;
 
       // Construct feature list
-      const features = [`${plan.credits} נקודות זכות כלולים`, ...plan.features];
+      const features = [
+        `${plan.credits} ${t.common.credits}`,
+        ...plan.features,
+      ];
 
       return {
         id: plan._id,
         name: translatedName,
-        tagline: plan.description || "התחילו ליצור בקלות",
+        tagline: plan.description || "Start creating with ease",
         price: `$${plan.monthlyPrice}`,
-        period: "לחודש",
+        period: t.pricing.month,
         features: features,
         highlight: isMiddle,
-        badge: isMiddle ? "הכי פופולרי" : undefined,
+        badge: isMiddle ? t.pricing.popular : undefined,
         buttonStyle: isMiddle
           ? "bg-white text-[#4F46E5] shadow-xl"
           : "bg-gradient-to-r from-[#00F6FF] to-[#4481EB] text-white shadow-[0_10px_20px_rgba(0,246,255,0.2)]",
@@ -89,17 +94,17 @@ export default function PricingSection() {
         <div className="text-center mb-16">
           {/* Top Badge */}
           <div className="inline-flex items-center gap-2 mb-6 rounded-full border border-[#6c63ff] px-5 py-2 text-sm font-medium text-[#6c63ff]">
-            <Sparkles className="w-4 h-4" /> תמחור
+            <Sparkles className="w-4 h-4" /> {t.pricing.badge}
           </div>
 
           {/* Main Heading */}
           <h1 className="text-5xl md:text-6xl font-extrabold text-[#1a2b4b] mb-6 leading-tight">
-            תמחור פשוט ושקוף
+            {t.pricing.title}
           </h1>
 
           {/* Subtitle */}
           <p className="text-lg md:text-xl font-medium text-[#6b7280] max-w-2xl mx-auto leading-relaxed">
-            התחל בחינם, שדרג כשתהיה מוכן. ללא עמלות נסתרות.
+            {t.pricing.subtitle}
           </p>
         </div>
 
@@ -109,13 +114,13 @@ export default function PricingSection() {
             <div className="col-span-full flex flex-col items-center justify-center py-20 gap-4">
               <Loader2 className="w-12 h-12 animate-spin text-[#4F46E5]" />
               <p className="text-xl font-bold text-gray-500">
-                טוען חבילות תמחור...
+                {t.pricing.loading}
               </p>
             </div>
           ) : activePlans.length === 0 ? (
             <div className="col-span-full text-center py-20">
               <p className="text-xl font-bold text-gray-400">
-                לא נמצאו חבילות תמחור זמינות כרגע.
+                {t.pricing.empty}
               </p>
             </div>
           ) : (
@@ -203,8 +208,8 @@ export default function PricingSection() {
                   className={`w-full py-5 rounded-[1.5rem] font-black text-xl transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer ${plan.buttonStyle}`}
                 >
                   {subscribeMutation.isPending
-                    ? "מעבד..."
-                    : "צור את העיצוב שלך"}
+                    ? t.pricing.processing
+                    : t.pricing.cta}
                 </motion.button>
               </motion.div>
             ))
