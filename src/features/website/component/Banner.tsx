@@ -1,14 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-
-const stats = [
-  { value: "8.4K +", label: "בעלי עסקים" },
-  { value: "9K +", label: "נוצרו פוסטים" },
-  { value: "5.6K +", label: "דירוג משתמש" },
-];
+import { useTranslation } from "@/locales";
 
 export default function Banner() {
+  const { t } = useTranslation();
+
+  const stats = [
+    { value: "8.4K +", label: t.banner.stats.businessOwners },
+    { value: "9K +", label: t.banner.stats.postsCreated },
+    { value: "5.6K +", label: t.banner.stats.userRating },
+  ];
   return (
     <section className="relative overflow-hidden bg-white py-14 lg:py-24 pt-[60px]">
       {/* Background Decorative Blobs - Subtle as per screenshot */}
@@ -22,10 +24,9 @@ export default function Banner() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-black text-[#1a2b4b] tracking-tight leading-[1.1] mb-10"
+            className="text-4xl md:text-6xl lg:text-7xl font-black text-[#1a2b4b] tracking-tight leading-[1.1] mb-10 whitespace-pre-line"
           >
-            צור עיצובים גרפיים <br className="hidden md:block" />
-            מדהימים עם AI
+            {t.banner.title}
           </motion.h1>
 
           {/* Subheadline - Gray text, balanced width for 2 lines on desktop */}
@@ -35,8 +36,7 @@ export default function Banner() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-lg md:text-xl text-gray-500 font-medium leading-relaxed max-w-3xl mb-14 px-4"
           >
-            תאר את העיצוב שאתה רוצה, התאם אישית את הגודל והצבעים וה-AI שלנו
-            ייצור באופן מיידי גרפיקה מוכנה לשימוש עבור מדיה חברתית, שיווק ועוד.
+            {t.banner.subtitle}
           </motion.p>
 
           {/* Action Buttons - Order matching LTR view of the screenshot */}
@@ -50,17 +50,17 @@ export default function Banner() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full sm:w-auto bg-white border border-[#00F6FF] text-[#4481EB] px-14 py-4 rounded-xl font-bold text-lg hover:bg-cyan-50/50 transition-all duration-300"
+              className="w-full sm:w-auto bg-white border border-[#00F6FF] text-[#4481EB] px-14 py-4 rounded-xl font-bold text-lg hover:bg-cyan-50/50 transition-all duration-300 cursor-pointer"
             >
-              חקור תכונות
+              {t.banner.explore}
             </motion.button>
             {/* Gradient Button (Right) */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-full sm:w-auto bg-gradient-to-r from-[#22D3EE] to-[#3B82F6] text-white px-14 py-4 rounded-xl font-bold text-lg shadow-[0_10px_30px_rgba(59,130,246,0.25)] hover:shadow-[0_15px_35px_rgba(59,130,246,0.4)] transition-all duration-300"
+              className="w-full sm:w-auto bg-gradient-to-r from-[#22D3EE] to-[#3B82F6] text-white px-14 py-4 rounded-xl font-bold text-lg shadow-[0_10px_30px_rgba(59,130,246,0.25)] hover:shadow-[0_15px_35px_rgba(59,130,246,0.4)] transition-all duration-300 cursor-pointer"
             >
-              התחל ליצור
+              {t.banner.start}
             </motion.button>
           </motion.div>
 

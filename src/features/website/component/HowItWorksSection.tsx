@@ -2,37 +2,17 @@
 
 import { motion } from "framer-motion";
 import { Upload, MessageSquarePlus, WandSparkles } from "lucide-react";
+import { useTranslation } from "@/locales";
+import { ElementType } from "react";
 
-const steps = [
-  {
-    icon: <Upload className="w-6 h-6 text-white" strokeWidth={2.2} />,
-    title: "העלה תמונה",
-    description:
-      "העלה תמונה או גרפיקה קיימת של המוצר או המותג שלך להמשך התאמה מדויקת.",
-  },
-  {
-    icon: (
-      <MessageSquarePlus className="w-6 h-6 text-white" strokeWidth={2.2} />
-    ),
-    title: "הוסף הנחיה",
-    description:
-      "תאר בכמה מילים את הסגנון, המסר או התוצאה הרצויה כדי שנוכל לייצר עיצוב מדויק.",
-  },
-  {
-    icon: <WandSparkles className="w-6 h-6 text-white" strokeWidth={2.2} />,
-    title: "צור עם AI",
-    description:
-      "ה-AI שלנו יעצב עבורך באופן מיידי פוסטר, באנר או עיצוב שיווקי מקצועי.",
-  },
-];
+const icons: ElementType[] = [Upload, MessageSquarePlus, WandSparkles];
 
 export default function HowItWorksSection() {
+  const { t } = useTranslation();
+  const steps = t.howItWorks.steps.map((s, i) => ({ ...s, Icon: icons[i] }));
+
   return (
-    <section
-      id="how-it-works"
-      dir="rtl"
-      className="overflow-hidden py-20 md:py-24"
-    >
+    <section id="how-it-works" className="overflow-hidden py-20 md:py-24">
       <div className="mx-auto max-w-7xl px-4">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
@@ -43,16 +23,15 @@ export default function HowItWorksSection() {
         >
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#8b7cff] px-4 py-2 text-sm font-medium text-[#6c63ff] bg-white/70">
             <WandSparkles className="h-4 w-4" />
-            איך זה עובד
+            {t.howItWorks.badge}
           </div>
 
           <h2 className="mb-3 text-3xl font-bold tracking-[-0.02em] text-[#1e2746] md:text-5xl">
-            כל מה שאתה צריך כדי להתבלט
+            {t.howItWorks.title}
           </h2>
 
           <p className="mx-auto max-w-3xl text-sm leading-7 text-[#667085] md:text-base">
-            ערכת כלים מלאה לעיצוב AI שנבנתה במיוחד עבור בעלי עסקים ללא צורך
-            בניסיון בעיצוב.
+            {t.howItWorks.subtitle}
           </p>
         </motion.div>
 
@@ -68,7 +47,7 @@ export default function HowItWorksSection() {
             >
               <div className="mb-6 flex justify-center md:justify-center">
                 <div className="rounded-[10px] bg-gradient-to-b from-[#6c63ff] to-[#3fa9f5] p-3 shadow-md ">
-                  {step.icon}
+                  <step.Icon className="w-6 h-6 text-white" strokeWidth={2.2} />
                 </div>
               </div>
 

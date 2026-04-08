@@ -1,48 +1,33 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, Zap, Layout, Clock, Globe, Briefcase } from "lucide-react";
+import {
+  Shield,
+  Zap,
+  Layout,
+  Clock,
+  Globe,
+  Briefcase,
+  LucideIcon,
+} from "lucide-react";
+import { useTranslation } from "@/locales";
 
-const features = [
-  {
-    icon: <Zap className="w-8 h-8 text-[#00F6FF]" />,
-    title: "מהירות שיא",
-    description:
-      "צרו וערכו פרסומות ברקע תוך דקות ספורות בעזרת כלים חכמים וממשק משתמש אינטואיטיבי.",
-  },
-  {
-    icon: <Shield className="w-8 h-8 text-[#4481EB]" />,
-    title: "אבטחה מקסימלית",
-    description:
-      "אנחנו מגנים על הנתונים והנכסים הדיגיטליים שלכם ברמת אבטחה של בנק, כדי שתהיו רגועים.",
-  },
-  {
-    icon: <Layout className="w-8 h-8 text-[#6C63FF]" />,
-    title: "עיצובים נקיים",
-    description:
-      "כל העיצובים שלנו מותאמים לטרנדים וחדשים ביותר בשוק הפרסום העולמי.",
-  },
-  {
-    icon: <Clock className="w-8 h-8 text-[#00F6FF]" />,
-    title: "ניהול זמן חסכוני",
-    description:
-      "המערכת שלנו חוסכת לכם עד 70% מהזמן המושקע בניהול וביצוע קמפיינים שיווקיים.",
-  },
-  {
-    icon: <Globe className="w-8 h-8 text-[#4481EB]" />,
-    title: "פריסה עולמית",
-    description:
-      "שלחו את הפרסומת שלכם לכל מקום בעולם בלחיצת כפתור אחת פשוטה ויעילה.",
-  },
-  {
-    icon: <Briefcase className="w-8 h-8 text-[#6C63FF]" />,
-    title: "פתרונות לעסקים",
-    description:
-      "כלים ייעודיים לעסקים וחברות גדולות שצריכים לנהל עשרות ומאות פרסומות בבת אחת.",
-  },
+const iconDefs: { Icon: LucideIcon; color: string }[] = [
+  { Icon: Zap, color: "text-[#00F6FF]" },
+  { Icon: Shield, color: "text-[#4481EB]" },
+  { Icon: Layout, color: "text-[#6C63FF]" },
+  { Icon: Clock, color: "text-[#00F6FF]" },
+  { Icon: Globe, color: "text-[#4481EB]" },
+  { Icon: Briefcase, color: "text-[#6C63FF]" },
 ];
 
 export default function FeaturesSection() {
+  const { t } = useTranslation();
+  const features = t.featuresSection.features.map((f, i) => ({
+    ...f,
+    ...iconDefs[i],
+  }));
+
   return (
     <section id="features" className="py-24 bg-white">
       <div className="container mx-auto px-4">
@@ -53,7 +38,7 @@ export default function FeaturesSection() {
             viewport={{ once: true }}
             className="inline-block px-4 py-2 rounded-full bg-cyan-50 text-[#4481EB] font-bold text-sm mb-4"
           >
-            למה לבחור בנו?
+            {t.featuresSection.badge}
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 30 }}
@@ -62,8 +47,10 @@ export default function FeaturesSection() {
             transition={{ delay: 0.1 }}
             className="text-3xl md:text-5xl font-bold text-gray-900"
           >
-            הכלים שיעזרו לכם{" "}
-            <span className="text-[#00F6FF]">לכבוש את השוק</span>
+            {t.featuresSection.title}{" "}
+            <span className="text-[#00F6FF]">
+              {t.featuresSection.titleHighlight}
+            </span>
           </motion.h2>
         </div>
 
@@ -79,7 +66,7 @@ export default function FeaturesSection() {
               className="p-8 rounded-3xl bg-gray-50 border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/10 hover:bg-white"
             >
               <div className="w-16 h-16 rounded-2xl bg-white shadow-lg flex items-center justify-center mb-6">
-                {feature.icon}
+                <feature.Icon className={`w-8 h-8 ${feature.color}`} />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">
                 {feature.title}
