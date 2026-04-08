@@ -4,29 +4,29 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#111827] text-white pt-20 pb-10">
+    <footer className="bg-[#111827] pt-20 pb-10 text-white">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+        <div className="mb-16 grid grid-cols-1 gap-12 text-center md:grid-cols-2 md:text-left lg:grid-cols-5">
           {/* Logo Section */}
-          <div className="lg:col-span-1">
-            <div className="flex items-center gap-1 mb-6">
+          <div className="flex flex-col items-center lg:col-span-1 md:items-start">
+            <div className="mb-6 flex items-center justify-center gap-1 md:justify-start">
               <span className="text-3xl font-black tracking-tight text-cyan-400">
                 Craft
               </span>
-              <div className="bg-gradient-to-r from-[#00F6FF] to-[#4481EB] rounded-lg px-2 py-0.5">
-                <span className="text-xl font-bold text-white italic">ad</span>
+              <div className="rounded-lg bg-gradient-to-r from-[#00F6FF] to-[#4481EB] px-2 py-0.5">
+                <span className="text-xl font-bold italic text-white">ad</span>
               </div>
             </div>
           </div>
 
           {/* Product Section */}
-          <div>
-            <h3 className="text-lg font-bold mb-8 text-white">מוצר</h3>
+          <div className="flex flex-col items-center md:items-start">
+            <h3 className="mb-8 text-lg font-bold text-white">מוצר</h3>
             <ul className="space-y-4">
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 transition-colors hover:text-white"
                 >
                   עיצוב פוסטרים
                 </a>
@@ -34,7 +34,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 transition-colors hover:text-white"
                 >
                   עיצוב לוגו
                 </a>
@@ -43,13 +43,13 @@ export default function Footer() {
           </div>
 
           {/* Legal Section */}
-          <div>
-            <h3 className="text-lg font-bold mb-8 text-white">חוקי</h3>
+          <div className="flex flex-col items-center md:items-start">
+            <h3 className="mb-8 text-lg font-bold text-white">חוקי</h3>
             <ul className="space-y-4">
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 transition-colors hover:text-white"
                 >
                   תנאים והגבלות
                 </a>
@@ -57,7 +57,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 transition-colors hover:text-white"
                 >
                   מדיניות פרטיות
                 </a>
@@ -65,7 +65,7 @@ export default function Footer() {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 transition-colors hover:text-white"
                 >
                   מדיניות עוגיות
                 </a>
@@ -74,22 +74,28 @@ export default function Footer() {
           </div>
 
           {/* Contact Section */}
-          <div>
-            <h3 className="text-lg font-bold mb-8 text-white">צור קשר</h3>
+          <div className="flex flex-col items-center md:items-start">
+            <h3 className="mb-8 text-lg font-bold text-white">צור קשר</h3>
             <ul className="space-y-4">
-              <li className="flex items-center gap-3 text-gray-400">
-                <span className="flex-1 text-right">support@gmail.com</span>
-                <Mail className="w-5 h-5 text-gray-400" />
+              <li className="flex flex-col items-center gap-2 text-gray-400 md:flex-row md:justify-between md:gap-3">
+                <Mail className="h-5 w-5 text-gray-400" />
+                <span className="text-center md:flex-1 md:text-right">
+                  support@gmail.com
+                </span>
               </li>
-              <li className="flex items-center gap-3 text-gray-400">
-                <span className="flex-1 text-right">+888 345 455</span>
-                <Phone className="w-5 h-5 text-gray-400" />
+
+              <li className="flex flex-col items-center gap-2 text-gray-400 md:flex-row md:justify-between md:gap-3">
+                <Phone className="h-5 w-5 text-gray-400" />
+                <span className="text-center md:flex-1 md:text-right">
+                  +888 345 455
+                </span>
               </li>
-              <li className="flex items-center gap-3 text-gray-400">
-                <span className="flex-1 text-right whitespace-pre-line text-sm leading-relaxed">
+
+              <li className="flex flex-col items-center gap-2 text-gray-400 md:flex-row md:justify-between md:gap-3">
+                <MapPin className="h-5 w-5 text-gray-400 md:self-start" />
+                <span className="text-center text-sm leading-relaxed whitespace-pre-line md:flex-1 md:text-right">
                   סן פרנסיסקו, קליפורניה, <br /> 123 AI Avenue
                 </span>
-                <MapPin className="w-5 h-5 text-gray-400 self-start" />
               </li>
             </ul>
           </div>
@@ -110,10 +116,10 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar Divider */}
-        <div className="h-px bg-gray-800 w-full mb-10" />
+        <div className="mb-10 h-px w-full bg-gray-800" />
 
         {/* Bottom Attribution */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-medium text-gray-500">
+        <div className="flex flex-col items-center justify-center gap-4 text-center text-sm font-medium text-gray-500 md:flex-row md:justify-between">
           <p>© 2026 Craft ad AI. כל הזכויות שמורות.</p>
           <p>נבנה עבור בעלי עסקים שרוצים לבלוט.</p>
         </div>

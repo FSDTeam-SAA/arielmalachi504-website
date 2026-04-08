@@ -66,8 +66,8 @@ export default function HowItWorksSection() {
               transition={{ delay: i * 0.12, duration: 0.4 }}
               className="rounded-[8px] border border-[#9ed8ff] bg-white px-8 py-10 text-center shadow-[0_0_0_1px_rgba(158,216,255,0.15)]"
             >
-              <div className="mb-6 flex justify-start md:justify-start">
-                <div className="mr-auto rounded-[10px] bg-gradient-to-b from-[#6c63ff] to-[#3fa9f5] p-3 shadow-md">
+              <div className="mb-6 flex justify-center md:justify-center">
+                <div className="rounded-[10px] bg-gradient-to-b from-[#6c63ff] to-[#3fa9f5] p-3 shadow-md ">
                   {step.icon}
                 </div>
               </div>

@@ -1,6 +1,5 @@
-import Development from "@/components/sheard/Development";
-import React from "react";
+import Settings from "@/features/UserDashboard/settings/component/Settings";
 
 export default function page() {
-  return <Development />;
+  return <Settings />;
 }

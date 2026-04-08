@@ -130,4 +130,37 @@
     padding-inline: 1.5rem;
     font-family: "Poppins", sans-serif;
   }
+
+  @keyframes spin-reverse {
+    from {
+      transform: rotate(360deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+
+  @keyframes progress-loading {
+    0% {
+      width: 0%;
+      left: 0;
+    }
+    50% {
+      width: 100%;
+      left: 0;
+    }
+    100% {
+      width: 0%;
+      left: 100%;
+    }
+  }
+
+  .animate-spin-reverse {
+    animation: spin-reverse 3s linear infinite;
+  }
+
+  .animate-progress-loading {
+    position: relative;
+    animation: progress-loading 2s infinite ease-in-out;
+  }
 }

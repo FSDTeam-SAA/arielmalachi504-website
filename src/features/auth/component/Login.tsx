@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Mail } from "lucide-react";
+import { Eye, EyeOff, Mail, Loader2 } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner"; // Assuming sonner is available based on common modern stacks, fallback to alert if not
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -12,6 +15,8 @@ export default function Login() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -22,15 +27,35 @@ export default function Login() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!formData.email.trim() || !formData.password.trim()) {
-      console.log("Email and password are required");
+      toast.error("Email and password are required");
       return;
     }
 
-    console.log("Login Form Data:", formData);
+    setIsLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Login successful!");
+        router.push("/dashboard-overview");
+        router.refresh();
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -109,9 +134,10 @@ export default function Login() {
 
         <button
           type="submit"
-          className="h-[44px] w-full rounded-[4px] bg-gradient-to-r from-[#22d3ee] to-[#4f86f7] text-sm font-medium text-white transition hover:opacity-95"
+          disabled={isLoading}
+          className="flex h-[44px] w-full items-center justify-center rounded-[4px] bg-gradient-to-r from-[#22d3ee] to-[#4f86f7] text-sm font-medium text-white transition hover:opacity-95 disabled:opacity-70"
         >
-          התחבר
+          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "התחבר"}
         </button>
       </form>
 

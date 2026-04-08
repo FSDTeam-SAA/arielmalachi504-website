@@ -11,7 +11,9 @@ import {
   Zap,
   Settings,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
+import { useUserProfileSettings } from "../../settings/hooks/useSettings";
 
 const stats = [
   {
@@ -93,10 +95,12 @@ const services = [
 
 export default function DashboardOverview() {
   const router = useRouter();
+  const { data, isLoading, isError } = useUserProfileSettings();
+  const profile = data?.data;
 
   return (
     <section className="min-h-screen p-4 md:p-6">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto container">
         <div className="mb-10">
           <h2 className="mb-4 text-[22px] font-medium text-[#666]">
             Dashboard Overview
@@ -131,42 +135,68 @@ export default function DashboardOverview() {
             Profile Overview
           </h2>
 
-          <div className="rounded-lg border border-[#e2edf4] bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-              <div className="h-[100px] w-[100px] overflow-hidden rounded-md">
-                <Image
-                  src="/images/profile.png"
-                  alt="Profile"
-                  width={100}
-                  height={100}
-                  className="h-full w-full object-cover"
-                />
+          <div className="rounded-lg border border-[#e2edf4] bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.03)] min-h-[160px] flex items-center justify-center">
+            {isLoading ? (
+              <div className="flex flex-col items-center gap-2 text-[#777]">
+                <Loader2 className="h-8 w-8 animate-spin text-[#22c8ea]" />
+                <p className="text-sm">Loading profile data...</p>
               </div>
-
-              <div className="flex-1">
-                <h3 className="text-[32px] font-medium leading-none text-[#444]">
-                  John Dow
-                </h3>
-                <p className="mt-2 text-[14px] text-[#777]">
-                  dowjohn44@gmail.com
-                </p>
-
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-[#eff7ff] px-3 py-1 text-xs text-[#69a8ff]">
-                    ♦ Free Plan
-                  </span>
-
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[#8bdd9a] bg-[#e9f9ec] px-3 py-1 text-xs text-[#2e9b48]">
-                    <BadgeCheck className="h-3 w-3 fill-[#2e9b48] text-[#2e9b48]" />
-                    Active
-                  </span>
+            ) : isError || !profile ? (
+              <div className="text-red-500 font-medium">
+                Failed to load profile information.
+              </div>
+            ) : (
+              <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-start">
+                <div className="h-[100px] w-[100px] overflow-hidden rounded-md bg-gray-100 flex-shrink-0">
+                  <Image
+                    src={
+                      profile.profileImage && profile.profileImage !== ""
+                        ? profile.profileImage
+                        : "/no-image.jpg"
+                    }
+                    alt={profile.name}
+                    width={100}
+                    height={100}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
 
-                <button className="mt-5 rounded-md bg-[#22c8ea] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#18bbdc]">
-                  Upgrade Plan
-                </button>
+                <div className="flex-1">
+                  <h3 className="text-[32px] font-medium leading-none text-[#444] break-words">
+                    {profile.name}
+                  </h3>
+                  <p className="mt-2 text-[14px] text-[#777]">
+                    {profile.email}
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs ${profile.isSubscribed ? "bg-[#fff8dd] text-[#e8bf12]" : "bg-[#eff7ff] text-[#69a8ff]"}`}
+                    >
+                      ♦ {profile.isSubscribed ? "Premium Plan" : "Free Plan"}
+                    </span>
+
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${profile.isSubscribed ? "border-[#8bdd9a] bg-[#e9f9ec] text-[#2e9b48]" : "border-gray-200 bg-gray-50 text-gray-500"}`}
+                    >
+                      {profile.isSubscribed && (
+                        <BadgeCheck className="h-3 w-3 fill-[#2e9b48] text-[#2e9b48]" />
+                      )}
+                      {profile.isSubscribed ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => router.push("/billing-payments")}
+                    className="mt-5 rounded-md bg-[#22c8ea] px-5 py-3 text-sm font-medium text-white transition hover:bg-[#18bbdc]"
+                  >
+                    {profile.isSubscribed
+                      ? "Manage Subscription"
+                      : "Upgrade Plan"}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

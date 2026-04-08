@@ -2,11 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { register } from "../api/auth.api";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
 
 export default function SignUp() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    firstName: "",
+    name: "",
     lastName: "",
     email: "",
     password: "",
@@ -15,6 +20,7 @@ export default function SignUp() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -25,15 +31,39 @@ export default function SignUp() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      console.log("Password mismatch ❌");
+      toast.error("הסיסמאות אינן תואמות ❌");
       return;
     }
 
-    console.log("Signup Data ✅:", formData);
+    setIsLoading(true);
+
+    try {
+      const response = await register({
+        name: formData.name,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (response.status) {
+        toast.success(response.message || "החשבון נוצר בהצלחה! 🎉");
+        router.push("/login");
+      } else {
+        toast.error(response.message || "נכשל ביצירת החשבון");
+      }
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "נכשל ביצירת החשבון");
+      } else {
+        toast.error("אירעה שגיאה בלתי צפויה");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -48,11 +78,11 @@ export default function SignUp() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label className="mb-2 block text-[15px] text-[#6b7280]">
-              שם משפחה
+              שם פרטי
             </label>
             <input
-              name="lastName"
-              value={formData.lastName}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               type="text"
               placeholder="שם כאן"
@@ -62,11 +92,11 @@ export default function SignUp() {
 
           <div>
             <label className="mb-2 block text-[15px] text-[#6b7280]">
-              שם פרטי
+              שם משפחה
             </label>
             <input
-              name="firstName"
-              value={formData.firstName}
+              name="lastName"
+              value={formData.lastName}
               onChange={handleChange}
               type="text"
               placeholder="שם כאן"
@@ -145,9 +175,17 @@ export default function SignUp() {
 
         <button
           type="submit"
-          className="mt-4 h-[54px] w-full rounded-[8px] bg-gradient-to-r from-[#1fd2ea] to-[#4c86f7] text-[16px] font-semibold text-white transition hover:opacity-95"
+          disabled={isLoading}
+          className="mt-4 flex h-[54px] w-full items-center justify-center gap-2 rounded-[8px] bg-gradient-to-r from-[#1fd2ea] to-[#4c86f7] text-[16px] font-semibold text-white transition hover:opacity-95 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          הירשם
+          {isLoading ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              מעבד...
+            </>
+          ) : (
+            "הירשם"
+          )}
         </button>
       </form>
 

@@ -2,20 +2,50 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { Mail, Loader2 } from "lucide-react";
+import { forgetPassword } from "../api/auth.api";
+import { toast } from "sonner";
+import { isAxiosError } from "axios";
+import { useRouter } from "next/navigation";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!email.trim()) {
-      console.log("Email is required");
+      toast.error("נא להזין כתובת אימייל");
       return;
     }
 
-    console.log("Forgot Password Email:", email);
+    setIsLoading(true);
+
+    try {
+      const response = await forgetPassword({ email });
+
+      if (response.status) {
+        toast.success(
+          response.message || "שלחנו לך אימייל עם קישור לאיפוס הסיסמה! 📧",
+        );
+        router.push("/verify-otp");
+      } else {
+        toast.error(response.message || "נכשל בשליחת קישור לאיפוס");
+      }
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message || "נכשל בשליחת קישור לאיפוס",
+        );
+      } else {
+        toast.error("אירעה שגיאה בלתי צפויה");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -48,9 +78,17 @@ export default function ForgotPassword() {
 
         <button
           type="submit"
-          className="h-[44px] w-full rounded-[4px] bg-gradient-to-r from-[#22d3ee] to-[#4f86f7] text-sm font-medium text-white transition hover:opacity-95"
+          disabled={isLoading}
+          className="flex h-[44px] w-full items-center justify-center gap-2 rounded-[4px] bg-gradient-to-r from-[#22d3ee] to-[#4f86f7] text-sm font-medium text-white transition hover:opacity-95 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          שלח קישור לאיפוס
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              מעבד...
+            </>
+          ) : (
+            "שלח קישור לאיפוס"
+          )}
         </button>
       </form>
 

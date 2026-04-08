@@ -1,7 +1,7 @@
-// src/app/api/auth/[...nextauth]/route.ts
-
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { ILoginResponse } from "@/features/auth/types/auth.types";
+
 const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
 declare module "next-auth" {
@@ -15,6 +15,7 @@ declare module "next-auth" {
     };
     accessToken: string;
     refreshToken: string;
+    error?: string;
   }
 
   interface User {
@@ -37,10 +38,10 @@ declare module "next-auth/jwt" {
     role: string;
     accessToken: string;
     refreshToken: string;
+    accessTokenExpires: number;
+    error?: string;
   }
 }
-
-import { refreshAccessToken } from "@/features/auth/api/refresh-token.api";
 
 const handler = NextAuth({
   providers: [
@@ -65,36 +66,37 @@ const handler = NextAuth({
             }),
           });
 
-          const data = await res.json();
+          const data: ILoginResponse = await res.json();
           console.log("API Login Response:", JSON.stringify(data, null, 2));
 
-          if (!res.ok) {
+          if (!res.ok || !data.status) {
             throw new Error(data.message || "Login failed");
           }
 
-          const user = data.data?.user;
+          const userData = data.data?.user;
           const accessToken = data.data?.accessToken;
 
-          console.log("User details:", user);
-          console.log("Token:", accessToken);
-
-          if (!user || !accessToken) {
+          if (!userData || !accessToken) {
             throw new Error("Invalid response from server");
           }
 
           // Return the object that NextAuth will use as 'user' in the jwt callback
           return {
-            id: user._id || user.id, // Ensure we get the ID
-            name: user.name,
-            email: user.email,
-            image: user.profileImage, // Map profileImage to image
-            role: user.role,
-            token: accessToken, // We attach the token here as a property of the user
-            refreshToken: user.refreshToken,
+            id: userData._id,
+            name: userData.email.split("@")[0], // Fallback name if missing
+            email: userData.email,
+            image: userData.profileImage,
+            role: userData.role,
+            token: accessToken,
+            refreshToken: userData.refreshToken,
           };
         } catch (error) {
           console.error("Authorize error:", error);
-          throw new Error("Invalid email or password");
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Invalid email or password";
+          throw new Error(errorMessage);
         }
       },
     }),
@@ -164,9 +166,9 @@ const handler = NextAuth({
           image: token.image,
           role: token.role,
         };
-        session.accessToken = token.accessToken;
-        session.refreshToken = token.refreshToken;
-        session.error = token.error;
+        session.accessToken = token.accessToken as string;
+        session.refreshToken = token.refreshToken as string;
+        session.error = token.error as string;
       }
       return session;
     },
@@ -174,5 +176,29 @@ const handler = NextAuth({
 
   secret: process.env.NEXTAUTH_SECRET,
 });
+
+async function refreshAccessToken(refreshToken: string) {
+  try {
+    const response = await fetch(`${baseUrl}/auth/refresh-token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw data;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("RefreshAccessTokenError", error);
+    return {
+      status: false,
+      message: "Failed to refresh access token",
+    };
+  }
+}
 
 export { handler as GET, handler as POST };

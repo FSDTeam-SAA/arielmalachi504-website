@@ -112,7 +112,7 @@ export default function VerifyOtp() {
 
           <div className="flex items-center gap-2 text-[#7a7f8c]">
             <Clock3 className="h-4 w-4" />
-            <span>00:59</span>
+            {/* <span>00:59</span> */}
           </div>
         </div>
 

@@ -1,9 +1,9 @@
-import Development from "@/components/sheard/Development";
+import BillingPayments from "@/features/UserDashboard/billingPayments/component/BillingPayments";
 
 export default function page() {
   return (
     <div>
-      <Development />
+      <BillingPayments />
     </div>
   );
 }

@@ -3,6 +3,9 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useUserProfileSettings } from "@/features/UserDashboard/settings/hooks/useSettings";
+import { Sparkles, LayoutDashboard } from "lucide-react";
 
 const navLinks = [
   { title: "בית", href: "/" },
@@ -12,6 +15,10 @@ const navLinks = [
 ];
 
 export default function Navbar() {
+  const { data: session, status } = useSession();
+  const { data: profileData } = useUserProfileSettings();
+  const credits = profileData?.data?.credits || 0;
+
   return (
     <motion.nav
       initial={{ y: -100 }}
@@ -45,20 +52,44 @@ export default function Navbar() {
           </div>
 
           {/* Buttons */}
-          <div className="flex items-center gap-4">
-            <Link
-              href={"/sign-up"}
-              className="bg-white border-2 border-[#00F6FF] text-[#4481EB] px-8 py-2.5 rounded-xl font-bold text-lg hover:bg-cyan-50 transition-all duration-300 cursor-pointer"
-            >
-              הירשם
-            </Link>
+          <div className="flex items-center gap-3 lg:gap-4">
+            {status === "authenticated" ? (
+              <>
+                {/* Credits Balance */}
+                <div className="hidden sm:flex items-center gap-2 bg-[#EEF2FF] border border-indigo-200 rounded-full p-1 h-[42px]">
+                  <div className="bg-indigo-500 w-8 h-8 rounded-full flex items-center justify-center text-white shadow-sm">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <span className="text-[#1E293B] font-bold text-sm whitespace-nowrap px-2">
+                    {new Intl.NumberFormat().format(credits)}
+                  </span>
+                </div>
 
-            <Link
-              href="/login"
-              className="bg-gradient-to-r from-[#00F6FF] to-[#4481EB] text-white px-8 py-2.5 rounded-xl font-bold text-lg shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 cursor-pointer"
-            >
-              היכנס
-            </Link>
+                <Link
+                  href="/dashboard-overview"
+                  className="bg-gradient-to-r from-[#00F6FF] to-[#4481EB] text-white px-5 lg:px-7 py-2.5 rounded-xl font-bold text-base lg:text-lg shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 cursor-pointer flex items-center gap-2"
+                >
+                  <LayoutDashboard className="w-4 h-4 lg:w-5 lg:h-5" />
+                  לוח בקרה
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={"/sign-up"}
+                  className="bg-white border-2 border-[#00F6FF] text-[#4481EB] px-8 py-2.5 rounded-xl font-bold text-lg hover:bg-cyan-50 transition-all duration-300 cursor-pointer"
+                >
+                  הירשם
+                </Link>
+
+                <Link
+                  href="/login"
+                  className="bg-gradient-to-r from-[#00F6FF] to-[#4481EB] text-white px-8 py-2.5 rounded-xl font-bold text-lg shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-300 cursor-pointer"
+                >
+                  היכנס
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu */}
