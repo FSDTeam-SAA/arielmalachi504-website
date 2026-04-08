@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import {
   useUserProfileSettings,
   useUpdateUserName,
+  useChangePassword,
 } from "../hooks/useSettings";
 import { toast } from "sonner";
 import { isAxiosError } from "axios";
@@ -48,7 +49,45 @@ function InformationForm({ initialData }: InformationFormProps) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const updateNameMutation = useUpdateUserName();
+  const changePasswordMutation = useChangePassword();
+
+  const handleUpdatePassword = async () => {
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      toast.error("All password fields are required");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    changePasswordMutation.mutate(
+      { oldPassword, newPassword },
+      {
+        onSuccess: () => {
+          toast.success("Password updated successfully");
+          setOldPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        },
+        onError: (error: unknown) => {
+          if (isAxiosError(error)) {
+            toast.error(
+              error.response?.data?.message || "Failed to change password",
+            );
+          } else {
+            toast.error("An unexpected error occurred");
+          }
+        },
+      },
+    );
+  };
 
   const [name, setName] = useState(initialData.name || "");
   const [email] = useState(initialData.email || "");
@@ -138,6 +177,8 @@ function InformationForm({ initialData }: InformationFormProps) {
               <PasswordField
                 label="Current Password"
                 placeholder="........"
+                value={oldPassword}
+                onChange={setOldPassword}
                 showPassword={showCurrentPassword}
                 togglePassword={() => setShowCurrentPassword((prev) => !prev)}
               />
@@ -145,6 +186,8 @@ function InformationForm({ initialData }: InformationFormProps) {
               <PasswordField
                 label="New Password"
                 placeholder="........"
+                value={newPassword}
+                onChange={setNewPassword}
                 showPassword={showNewPassword}
                 togglePassword={() => setShowNewPassword((prev) => !prev)}
               />
@@ -152,12 +195,20 @@ function InformationForm({ initialData }: InformationFormProps) {
               <PasswordField
                 label="Confirm New Password"
                 placeholder="........"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
                 showPassword={showConfirmPassword}
                 togglePassword={() => setShowConfirmPassword((prev) => !prev)}
               />
 
-              <button className="flex h-12 w-full cursor-pointer items-center justify-center rounded-md bg-gradient-to-r from-[#18c7df] to-[#4f8df7] text-sm font-medium text-white transition hover:opacity-95">
-                Save Changes
+              <button
+                onClick={handleUpdatePassword}
+                disabled={changePasswordMutation.isPending}
+                className="flex h-12 w-full cursor-pointer items-center justify-center rounded-md bg-gradient-to-r from-[#18c7df] to-[#4f8df7] text-sm font-medium text-white shadow-sm transition hover:opacity-95 disabled:opacity-50"
+              >
+                {changePasswordMutation.isPending
+                  ? "Saving..."
+                  : "Save Changes"}
               </button>
             </div>
           </div>
@@ -172,6 +223,8 @@ interface PasswordFieldProps {
   placeholder: string;
   showPassword: boolean;
   togglePassword: () => void;
+  value: string;
+  onChange: (value: string) => void;
 }
 
 function PasswordField({
@@ -179,6 +232,8 @@ function PasswordField({
   placeholder,
   showPassword,
   togglePassword,
+  value,
+  onChange,
 }: PasswordFieldProps) {
   return (
     <div>
@@ -190,6 +245,8 @@ function PasswordField({
         <input
           type={showPassword ? "text" : "password"}
           placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           className="h-12 w-full rounded-md border border-transparent bg-[#f5f5f5] px-4 pr-12 text-sm text-[#5f6673] outline-none placeholder:text-[#9aa3af] focus:border-[#7aa7ff]"
         />
 

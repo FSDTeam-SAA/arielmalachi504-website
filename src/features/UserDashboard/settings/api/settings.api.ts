@@ -15,3 +15,20 @@ export const updateUserName = async (
   const response = await axiosInstance.put("/user/me", { name });
   return response.data;
 };
+
+export interface IPasswordChangeRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface IPasswordChangeResponse {
+  status: boolean;
+  message: string;
+}
+
+export const changePassword = async (
+  data: IPasswordChangeRequest,
+): Promise<IPasswordChangeResponse> => {
+  const response = await axiosInstance.post("/auth/change-password", data);
+  return response.data;
+};
