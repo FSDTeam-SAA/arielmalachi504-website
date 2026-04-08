@@ -96,7 +96,7 @@ export default function Creation() {
               שלך.
             </p>
 
-            <button className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#22cafe] to-[#4e74ff] px-10 py-4 text-lg font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-105 hover:opacity-95 active:scale-95">
+            <button className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#22cafe] to-[#4e74ff] px-10 py-4 text-lg font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-105 hover:opacity-95 active:scale-95 cursor-pointer">
               צור את העיצוב שלך
             </button>
           </motion.div>

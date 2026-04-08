@@ -50,3 +50,20 @@ export const getSubscriptionPlans =
     const response = await axiosInstance.get("/subscription");
     return response.data;
   };
+
+export interface ISubscribeResponse {
+  status: boolean;
+  message: string;
+  data: {
+    sessionUrl: string;
+  };
+}
+
+export const subscribeToPlan = async (
+  planId: string,
+): Promise<ISubscribeResponse> => {
+  const response = await axiosInstance.post(
+    `/subscription/subscribe/${planId}`,
+  );
+  return response.data;
+};

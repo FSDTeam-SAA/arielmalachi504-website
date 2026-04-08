@@ -2,10 +2,46 @@
 
 import { motion } from "framer-motion";
 import { Check, Sparkles, Loader2 } from "lucide-react";
-import { useSubscriptionPlans } from "@/features/UserDashboard/billingPayments/hooks/useBillingPayments";
+import {
+  useSubscriptionPlans,
+  useSubscribeToPlan,
+} from "@/features/UserDashboard/billingPayments/hooks/useBillingPayments";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { isAxiosError } from "axios";
 
 export default function PricingSection() {
   const { data, isLoading } = useSubscriptionPlans();
+  const { status } = useSession();
+  const router = useRouter();
+  const subscribeMutation = useSubscribeToPlan();
+
+  const handleSubscribe = async (planId: string) => {
+    if (status === "unauthenticated") {
+      toast.error("אנא התחבר כדי לרכוש חבילה");
+      router.push("/login");
+      return;
+    }
+
+    subscribeMutation.mutate(planId, {
+      onSuccess: (response) => {
+        if (response?.data?.sessionUrl) {
+          window.location.href = response.data.sessionUrl;
+        } else {
+          toast.success("המנוי בוצע בהצלחה!");
+          router.push("/dashboard-overview");
+        }
+      },
+      onError: (error: unknown) => {
+        if (isAxiosError(error)) {
+          toast.error(error.response?.data?.message || "נכשל בביצוע המנוי");
+        } else {
+          toast.error("אירעה שגיאה בלתי צפויה");
+        }
+      },
+    });
+  };
 
   const getMappedPlans = () => {
     if (!data?.data) return [];
@@ -28,6 +64,7 @@ export default function PricingSection() {
       const features = [`${plan.credits} נקודות זכות כלולים`, ...plan.features];
 
       return {
+        id: plan._id,
         name: translatedName,
         tagline: plan.description || "התחילו ליצור בקלות",
         price: `$${plan.monthlyPrice}`,
@@ -159,11 +196,15 @@ export default function PricingSection() {
 
                 {/* Action Button */}
                 <motion.button
+                  onClick={() => handleSubscribe(plan.id)}
+                  disabled={subscribeMutation.isPending}
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`w-full py-5 rounded-[1.5rem] font-black text-xl transition-all duration-300 ${plan.buttonStyle}`}
+                  className={`w-full py-5 rounded-[1.5rem] font-black text-xl transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer ${plan.buttonStyle}`}
                 >
-                  צור את העיצוב שלך
+                  {subscribeMutation.isPending
+                    ? "מעבד..."
+                    : "צור את העיצוב שלך"}
                 </motion.button>
               </motion.div>
             ))
