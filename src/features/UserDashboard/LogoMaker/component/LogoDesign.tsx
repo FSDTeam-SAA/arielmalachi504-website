@@ -12,6 +12,9 @@ import {
   X,
   UploadCloud,
   Download,
+  Languages,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -151,7 +154,7 @@ export default function LogoDesign() {
     }
   };
 
-  const [language] = useState("en");
+  const [language, setLanguage] = useState("en");
 
   const [referenceImage, setReferenceImage] = useState<File | null>(null);
   const [referenceImagePreview, setReferenceImagePreview] = useState<
@@ -169,9 +172,9 @@ export default function LogoDesign() {
   const [selectedPalette, setSelectedPalette] = useState("Ocean Blue");
 
   const [customColors, setCustomColors] = useState([
-    { enabled: true, color: "#4C8CF0", hex: "#4695FA" },
-    { enabled: true, color: "#4C8CF0", hex: "#4695FA" },
-    { enabled: true, color: "#7A56E0", hex: "#4695FA" },
+    { color: "#4C8CF0", hex: "#4695FA" },
+    { color: "#E52420", hex: "#E52420" },
+    { color: "#7A56E0", hex: "#7A56E0" },
   ]);
 
   const handleInputChange = (
@@ -209,12 +212,16 @@ export default function LogoDesign() {
     }
   };
 
-  const handleToggleColor = (index: number) => {
-    setCustomColors((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, enabled: !item.enabled } : item,
-      ),
-    );
+  const handleRemoveColor = (index: number) => {
+    setCustomColors((prev) => prev.filter((_, i) => i !== index));
+  };
+  const handleAddColor = () => {
+    if (customColors.length < 3) {
+      setCustomColors((prev) => [
+        ...prev,
+        { color: "#4C8CF0", hex: "#4695FA" },
+      ]);
+    }
   };
 
   const handleColorChange = (index: number, value: string) => {
@@ -235,10 +242,7 @@ export default function LogoDesign() {
     const palette = palettePresets.find((p) => p.name === selectedPalette);
     const paletteColors = palette ? palette.colors.join(",") : "";
 
-    const enabledCustomColors = customColors
-      .filter((c) => c.enabled)
-      .map((c) => c.color)
-      .join(",");
+    const enabledCustomColors = customColors.map((c) => c.color).join(",");
 
     const colorPalette = enabledCustomColors || paletteColors;
 
@@ -432,6 +436,43 @@ export default function LogoDesign() {
                 ))}
               </div>
             </div>
+            {/* Target Language */}
+            <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
+              <div className="mb-4 flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
+                <Languages className="h-4 w-4 text-[#4f79e8]" />
+                <span>Target Language</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 cursor-pointer">
+                {[
+                  { id: "en", label: "English", icon: "" },
+                  { id: "he", label: "Hebrew (עברית)", icon: "" },
+                ].map((lang) => (
+                  <button
+                    key={lang.id}
+                    type="button"
+                    onClick={() => setLanguage(lang.id)}
+                    className={`flex items-center justify-between rounded-xl p-3 px-4 transition cursor-pointer ${
+                      language === lang.id
+                        ? "bg-[#eef5ff] text-[#4f79e8] ring-1 ring-[#b7d0ff]"
+                        : "bg-[#f7f7f7] text-[#848b92] hover:bg-[#f1f5f9]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-[18px]">{lang.icon}</span>
+                      <span className="text-[13px] font-medium">
+                        {lang.label}
+                      </span>
+                    </div>
+                    {language === lang.id && (
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#4f79e8] text-white">
+                        <Check className="h-3 w-3" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Logo Style */}
             <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
@@ -514,40 +555,52 @@ export default function LogoDesign() {
               </div>
 
               <div className="mt-4 rounded-xl border border-[#dbe6f0] bg-white p-4 shadow-[0_6px_16px_rgba(44,87,140,0.04)]">
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div className="flex flex-col gap-3">
                   {customColors.map((item, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleColor(index)}
-                        className={`flex h-4 w-4 items-center justify-center rounded-[4px] border text-white ${
-                          item.enabled
-                            ? "border-[#7c6cff] bg-[#7c6cff]"
-                            : "border-[#cfd6dd] bg-white"
-                        }`}
-                      >
-                        {item.enabled && <Check className="h-3 w-3" />}
-                      </button>
-
+                    <div key={index} className="flex items-center gap-3">
                       <input
                         type="color"
                         value={item.color}
                         onChange={(e) =>
                           handleColorChange(index, e.target.value)
                         }
-                        className="h-8 w-8 cursor-pointer rounded-md border-0 bg-transparent p-0"
+                        className="h-10 w-10 cursor-pointer rounded-lg border-0 bg-transparent p-0"
                       />
 
-                      <input
-                        type="text"
-                        value={item.hex}
-                        onChange={(e) =>
-                          handleColorChange(index, e.target.value)
-                        }
-                        className="h-[38px] w-full rounded-lg border border-[#dbe6f0] bg-[#fafbfc] px-3 text-[13px] text-[#666] outline-none"
-                      />
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          value={item.hex}
+                          onChange={(e) =>
+                            handleColorChange(index, e.target.value)
+                          }
+                          className="h-[42px] w-full rounded-lg border border-[#dbe6f0] bg-[#fafbfc] px-4 text-[13px] font-medium text-[#444] outline-none transition focus:border-[#4b8df8] focus:bg-white"
+                        />
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-[#b0b8c1]">
+                          HEX
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveColor(index)}
+                        className="flex h-[42px] w-[42px] cursor-pointer items-center justify-center rounded-lg border border-[#fee2e2] bg-[#fff5f5] text-[#f87171] transition hover:bg-[#fee2e2] hover:text-[#ef4444]"
+                      >
+                        <Trash2 className="h-4 w-4 cursor-pointer" />
+                      </button>
                     </div>
                   ))}
+
+                  {customColors.length < 3 && (
+                    <button
+                      type="button"
+                      onClick={handleAddColor}
+                      className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-dashed border-[#dbe6f0] py-4 text-[13px] font-medium text-[#7c8691] transition hover:border-[#4b8df8] hover:bg-[#f0f7ff] hover:text-[#4b8df8]"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Another Color
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
