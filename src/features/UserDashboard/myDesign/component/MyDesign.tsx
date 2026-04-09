@@ -12,84 +12,21 @@ import {
   Crop,
 } from "lucide-react";
 import { useState } from "react";
-
-type DesignItem = {
-  id: number;
-  title: string;
-  time: string;
-  image: string;
-  type: string;
-  prompt: string;
-  style: string;
-  platform: string;
-  format: string;
-  variants: string[];
-};
-
-const designs: DesignItem[] = [
-  {
-    id: 1,
-    title: "Pizza House Special Deal",
-    time: "Today, 2:30 PM",
-    image:
-      "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=1200&auto=format&fit=crop",
-    type: "Poster",
-    prompt:
-      "Vibrant pizza promotional design with warm red and orange colors, bold headline, tasty product focus, and eye-catching restaurant advertising style.",
-    style: "Bold & Vibrant",
-    platform: "Facebook",
-    format: "1:1 Square (1080×1080px)",
-    variants: [
-      "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1514326640560-7d063ef2aed5?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1541745537411-b8046dc6d66c?q=80&w=1200&auto=format&fit=crop",
-    ],
-  },
-  {
-    id: 2,
-    title: "Pizza House Special Deal",
-    time: "Yesterday, 2:30 PM",
-    image:
-      "https://images.unsplash.com/photo-1514326640560-7d063ef2aed5?q=80&w=1200&auto=format&fit=crop",
-    type: "Poster",
-    prompt:
-      "Modern grand opening restaurant design with dynamic composition, promotional text, warm colors, and strong visual hierarchy.",
-    style: "Modern Promo",
-    platform: "Instagram",
-    format: "4:5 Portrait (1080×1350px)",
-    variants: [
-      "https://images.unsplash.com/photo-1514326640560-7d063ef2aed5?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1594007654729-407eedc4be65?q=80&w=1200&auto=format&fit=crop",
-    ],
-  },
-  {
-    id: 3,
-    title: "Pizza House Special Deal",
-    time: "Yesterday, 10:30 AM",
-    image:
-      "https://images.unsplash.com/photo-1513639776629-7b61b0ac49cb?q=80&w=1200&auto=format&fit=crop",
-    type: "Poster",
-    prompt:
-      "High-energy sale poster with bold yellow typography, red background burst, and strong promotional retail advertisement feeling.",
-    style: "Sales Campaign",
-    platform: "Facebook",
-    format: "1:1 Square (1080×1080px)",
-    variants: [
-      "https://images.unsplash.com/photo-1513639776629-7b61b0ac49cb?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1594007654729-407eedc4be65?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1514326640560-7d063ef2aed5?q=80&w=1200&auto=format&fit=crop",
-    ],
-  },
-];
+import { format } from "date-fns";
+import { useMyDesign, useDeleteDesign } from "../hooks/useMyDesign";
+import { IDesignHistoryItem } from "../types/myDesign.types";
+import { Loader2 } from "lucide-react";
 
 export default function MyDesign() {
-  const [selectedDesign, setSelectedDesign] = useState<DesignItem | null>(null);
+  const { data, isLoading, error } = useMyDesign("all", 20);
+  const deleteMutation = useDeleteDesign();
+  const [selectedDesign, setSelectedDesign] =
+    useState<IDesignHistoryItem | null>(null);
   const [selectedPreviewImage, setSelectedPreviewImage] = useState<string>("");
 
-  const handleOpenPreview = (design: DesignItem) => {
+  const handleOpenPreview = (design: IDesignHistoryItem) => {
     setSelectedDesign(design);
-    setSelectedPreviewImage(design.image);
+    setSelectedPreviewImage(design.resultUrls[0] || "");
   };
 
   const handleClosePreview = () => {
@@ -97,7 +34,12 @@ export default function MyDesign() {
     setSelectedPreviewImage("");
   };
 
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
+  };
+
   const handleDownload = async (imageUrl: string, title: string) => {
+    if (!imageUrl) return;
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
@@ -105,7 +47,7 @@ export default function MyDesign() {
 
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${title.toLowerCase().replace(/\s+/g, "-")}.jpg`;
+      link.download = `${title.toLowerCase().replace(/\s+/g, "-")}.png`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -116,6 +58,25 @@ export default function MyDesign() {
     }
   };
 
+  if (error) {
+    return (
+      <div className="flex h-[400px] w-full flex-col items-center justify-center gap-4 rounded-xl border border-red-100 bg-red-50/30 p-8 text-center">
+        <div className="rounded-full bg-red-100 p-3 text-red-600">
+          <Trash2 className="h-6 w-6" />
+        </div>
+        <h3 className="text-xl font-semibold text-red-900">
+          Failed to load designs
+        </h3>
+        <p className="max-w-md text-red-600/80">
+          There was an error fetching your design history. Please try refreshing
+          the page.
+        </p>
+      </div>
+    );
+  }
+
+  const designs = data?.data || [];
+
   return (
     <>
       <section className="min-h-screen p-4 md:p-6">
@@ -125,56 +86,131 @@ export default function MyDesign() {
               My Designs <span className="text-[#7c8594]">(last 3 days)</span>
             </h2>
 
-            <button className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-[#18c7df] to-[#4f8df7] px-5 text-sm font-medium text-white shadow-sm transition hover:opacity-95">
+            {/* <button className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-[#18c7df] to-[#4f8df7] px-5 text-sm font-medium text-white shadow-sm transition hover:opacity-95">
               <span className="text-lg leading-none">+</span>
               New Design
-            </button>
+            </button> */}
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {designs.map((design) => (
-              <div
-                key={design.id}
-                className="overflow-hidden rounded-lg border border-[#d9e7f2] bg-white shadow-[0_4px_14px_rgba(15,23,42,0.06)]"
-              >
-                <div className="relative h-[180px] w-full overflow-hidden">
-                  <Image
-                    src={design.image}
-                    alt={design.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                  />
-                </div>
-
-                <div className="p-4">
-                  <h3 className="text-[24px] font-medium leading-tight text-[#5d6573]">
-                    {design.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-[#9aa3af]">{design.time}</p>
-
-                  <div className="mt-4 flex items-center gap-4">
-                    <button
-                      onClick={() => handleOpenPreview(design)}
-                      className="h-10 min-w-[138px] rounded-md bg-gradient-to-r from-[#16c8df] to-[#4f8df7] px-6 text-sm font-medium text-white transition hover:opacity-95"
-                    >
-                      Preview
-                    </button>
-
-                    <button
-                      onClick={() => handleDownload(design.image, design.title)}
-                      className="flex h-10 w-10 items-center justify-center text-[#4b5563] transition hover:text-[#111827]"
-                    >
-                      <Download className="h-[18px] w-[18px]" />
-                    </button>
-
-                    <button className="flex h-10 w-10 items-center justify-center text-[#ff3b30] transition hover:opacity-80">
-                      <Trash2 className="h-[18px] w-[18px]" />
-                    </button>
+            {isLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-pulse overflow-hidden rounded-lg border border-[#d9e7f2] bg-white"
+                >
+                  <div className="h-[180px] w-full bg-gray-200" />
+                  <div className="p-4">
+                    <div className="h-6 w-3/4 rounded bg-gray-200" />
+                    <div className="mt-2 h-4 w-1/4 rounded bg-gray-200" />
+                    <div className="mt-4 flex gap-4">
+                      <div className="h-10 w-32 rounded bg-gray-200" />
+                      <div className="h-10 w-10 rounded bg-gray-200" />
+                      <div className="h-10 w-10 rounded bg-gray-200" />
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : designs.length === 0 ? (
+              <div className="col-span-full flex h-[400px] flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-gray-300 bg-gray-50/50 p-8 text-center text-gray-500">
+                <div className="rounded-full bg-gray-100 p-4">
+                  <Wand2 className="h-8 w-8 text-gray-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    No designs yet
+                  </h3>
+                  <p className="mt-1">
+                    Start creating your first AI masterpiece!
+                  </p>
+                </div>
               </div>
-            ))}
+            ) : (
+              designs.map((design) => (
+                <div
+                  key={design._id}
+                  className="overflow-hidden rounded-lg border border-[#d9e7f2] bg-white shadow-[0_4px_14px_rgba(15,23,42,0.06)]"
+                >
+                  <div className="relative h-[180px] w-full overflow-hidden bg-gray-50">
+                    {design.status === "completed" && design.resultUrls[0] ? (
+                      <Image
+                        src={design.resultUrls[0]}
+                        alt={design.generationType}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[#f8fafc] text-[#94a3b8]">
+                        {design.status === "processing" ? (
+                          <>
+                            <Loader2 className="h-8 w-8 animate-spin text-[#4f8df7]" />
+                            <span className="text-sm font-medium">
+                              Processing...
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <X className="h-8 w-8 text-red-400" />
+                            <span className="text-sm font-medium text-red-400">
+                              Failed
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-4">
+                    <h3 className="text-[24px] font-medium leading-tight text-[#5d6573]">
+                      {design.generationType.charAt(0).toUpperCase() +
+                        design.generationType.slice(1)}
+                    </h3>
+                    <p className="mt-1 text-sm text-[#9aa3af]">
+                      {format(
+                        new Date(design.createdAt),
+                        "MMM d, yyyy • h:mm a",
+                      )}
+                    </p>
+
+                    <div className="mt-4 flex items-center gap-4">
+                      <button
+                        disabled={design.status !== "completed"}
+                        onClick={() => handleOpenPreview(design)}
+                        className="h-10 min-w-[138px] cursor-pointer rounded-md bg-gradient-to-r from-[#16c8df] to-[#4f8df7] px-6 text-sm font-medium text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Preview
+                      </button>
+
+                      <button
+                        disabled={design.status !== "completed"}
+                        onClick={() =>
+                          handleDownload(
+                            design.resultUrls[0],
+                            design.generationType,
+                          )
+                        }
+                        className="flex h-10 w-10 cursor-pointer items-center justify-center text-[#4b5563] transition hover:text-[#111827] disabled:opacity-30"
+                      >
+                        <Download className="h-[18px] w-[18px]" />
+                      </button>
+
+                      <button
+                        disabled={deleteMutation.isPending}
+                        onClick={() => handleDelete(design._id)}
+                        className="flex h-10 w-10 cursor-pointer items-center justify-center text-[#ff3b30] transition hover:opacity-80 disabled:opacity-30"
+                      >
+                        {deleteMutation.isPending ? (
+                          <Loader2 className="h-[18px] w-[18px] animate-spin" />
+                        ) : (
+                          <Trash2 className="h-[18px] w-[18px]" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -190,10 +226,10 @@ export default function MyDesign() {
             </button>
 
             <div className="mb-6 flex flex-col gap-4 pr-10 md:flex-row md:items-center">
-              <div className="relative h-[60px] w-[60px] overflow-hidden rounded-xl">
+              <div className="relative h-[60px] w-[60px] overflow-hidden rounded-xl bg-gray-100">
                 <Image
-                  src={selectedDesign.image}
-                  alt={selectedDesign.title}
+                  src={selectedDesign.resultUrls[0] || ""}
+                  alt={selectedDesign.generationType}
                   fill
                   className="object-cover"
                 />
@@ -201,10 +237,20 @@ export default function MyDesign() {
 
               <div className="flex flex-wrap items-center gap-3">
                 <h3 className="text-[28px] font-medium leading-tight text-[#111827]">
-                  {selectedDesign.title}
+                  {selectedDesign.generationType.charAt(0).toUpperCase() +
+                    selectedDesign.generationType.slice(1)}
                 </h3>
                 <span className="inline-flex h-10 items-center rounded-xl bg-[#eef2ff] px-4 text-[16px] font-medium text-[#5468ff]">
-                  {selectedDesign.type}
+                  {selectedDesign.generationType}
+                </span>
+                <span
+                  className={`inline-flex h-10 items-center rounded-xl px-4 text-[16px] font-medium ${
+                    selectedDesign.status === "completed"
+                      ? "bg-green-50 text-green-600"
+                      : "bg-orange-50 text-orange-600"
+                  }`}
+                >
+                  {selectedDesign.status}
                 </span>
               </div>
             </div>
@@ -214,35 +260,37 @@ export default function MyDesign() {
                 <div className="relative h-[360px] w-full overflow-hidden rounded-2xl bg-[#f4f7fb]">
                   <Image
                     src={selectedPreviewImage}
-                    alt={selectedDesign.title}
+                    alt={selectedDesign.generationType}
                     fill
                     className="object-cover"
                   />
                 </div>
 
-                <div className="mt-4 flex gap-3">
-                  {selectedDesign.variants.map((variant, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedPreviewImage(variant)}
-                      className={`relative h-[82px] w-[110px] overflow-hidden rounded-xl border-2 transition ${
-                        selectedPreviewImage === variant
-                          ? "border-[#4f46e5]"
-                          : "border-transparent"
-                      }`}
-                    >
-                      <Image
-                        src={variant}
-                        alt={`Variant ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
+                {selectedDesign.resultUrls.length > 1 && (
+                  <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+                    {selectedDesign.resultUrls.map((variant, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedPreviewImage(variant)}
+                        className={`relative h-[82px] w-[110px] flex-shrink-0 overflow-hidden rounded-xl border-2 transition ${
+                          selectedPreviewImage === variant
+                            ? "border-[#4f46e5]"
+                            : "border-transparent"
+                        }`}
+                      >
+                        <Image
+                          src={variant}
+                          alt={`Variant ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 <p className="mt-4 text-center text-[16px] text-[#667085]">
-                  {selectedDesign.variants.length} variants available
+                  {selectedDesign.resultUrls.length} variants available
                 </p>
               </div>
 
@@ -259,7 +307,8 @@ export default function MyDesign() {
                     </span>
                   </div>
                   <p className="text-[15px] leading-8 text-[#5f6880]">
-                    {selectedDesign.prompt}
+                    {selectedDesign.prompt ||
+                      "No prompt details available for this generation."}
                   </p>
                 </div>
 
@@ -267,22 +316,25 @@ export default function MyDesign() {
                   <DetailBox
                     icon={<CalendarDays className="h-5 w-5" />}
                     title="Created"
-                    value={selectedDesign.time}
+                    value={format(
+                      new Date(selectedDesign.createdAt),
+                      "MMM d, yyyy • h:mm a",
+                    )}
                   />
                   <DetailBox
                     icon={<Tag className="h-5 w-5" />}
-                    title="Design Style"
-                    value={selectedDesign.style}
+                    title="Credit Cost"
+                    value={`${selectedDesign.creditCost} Credits`}
                   />
                   <DetailBox
                     icon={<Monitor className="h-5 w-5" />}
                     title="Platform"
-                    value={selectedDesign.platform}
+                    value={selectedDesign.platform || "Web Application"}
                   />
                   <DetailBox
                     icon={<Crop className="h-5 w-5" />}
                     title="Format / Size"
-                    value={selectedDesign.format}
+                    value={selectedDesign.format || "High Definition"}
                   />
                 </div>
               </div>
@@ -291,15 +343,22 @@ export default function MyDesign() {
             <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
               <button
                 onClick={() =>
-                  handleDownload(selectedPreviewImage, selectedDesign.title)
+                  handleDownload(
+                    selectedPreviewImage,
+                    selectedDesign.generationType,
+                  )
                 }
-                className="h-16 rounded-[20px] bg-gradient-to-r from-[#19c5df] to-[#5a6df8] text-[18px] font-medium text-white transition hover:opacity-95"
+                disabled={selectedDesign.status !== "completed"}
+                className="h-16 rounded-[20px] cursor-pointer bg-gradient-to-r from-[#19c5df] to-[#5a6df8] text-[18px] font-medium text-white transition hover:opacity-95 disabled:opacity-50"
               >
                 Download
               </button>
 
-              <button className="h-16 rounded-[20px] border border-[#d6dbe4] bg-white text-[18px] font-medium text-[#4f46e5] transition hover:bg-gray-50">
-                Details
+              <button
+                onClick={handleClosePreview}
+                className="h-16 rounded-[20px] cursor-pointer border border-[#d6dbe4] bg-white text-[18px] font-medium text-[#4f46e5] transition hover:bg-gray-50"
+              >
+                Close
               </button>
             </div>
           </div>
