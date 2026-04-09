@@ -10,9 +10,11 @@ import {
   X,
   UploadCloud,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useAiGenerateFields } from "../hooks/usePosterDesign";
 import CustomizeBrandKit from "./CustomizeBrandKit";
 
 type FormDataType = {
@@ -110,6 +112,15 @@ export default function PosterDesign() {
     height: "600px",
   });
 
+  const aiGenerateMutation = useAiGenerateFields((data) => {
+    setFormData((prev) => ({
+      ...prev,
+      headline: data.title || prev.headline,
+      subHeadline: data.subtitle || prev.subHeadline,
+      designStylePrompt: data.design_style || prev.designStylePrompt,
+    }));
+  });
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -158,6 +169,13 @@ export default function PosterDesign() {
       website: "",
       businessDescription: "",
     }));
+  };
+
+  const handleAiGenerate = () => {
+    if (!formData.businessDescription.trim()) {
+      return;
+    }
+    aiGenerateMutation.mutate({ idea: formData.businessDescription });
   };
 
   const handleGenerate = () => {
@@ -454,11 +472,18 @@ export default function PosterDesign() {
 
               <button
                 type="button"
-                onClick={handleGenerate}
-                className="mt-4 inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1fd2ea] via-[#39a9f5] to-[#5d72ff] text-[16px] font-semibold text-white shadow-[0_10px_20px_rgba(80,130,255,0.22)] transition hover:scale-[1.01] hover:opacity-95"
+                disabled={aiGenerateMutation.isPending}
+                onClick={handleAiGenerate}
+                className="mt-4 inline-flex h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1fd2ea] via-[#39a9f5] to-[#5d72ff] text-[16px] font-semibold text-white shadow-[0_10px_20px_rgba(80,130,255,0.22)] transition hover:scale-[1.01] hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-80"
               >
-                <Sparkles className="h-4 w-4" />
-                Generate Content with AI
+                {aiGenerateMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                {aiGenerateMutation.isPending
+                  ? "Generating Content..."
+                  : "Generate Content with AI"}
               </button>
             </div>
 
@@ -540,7 +565,7 @@ export default function PosterDesign() {
                     value={formData.width}
                     onChange={handleInputChange}
                     type="text"
-                    placeholder="400px"
+                    // placeholder="400px"
                     className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                   />
                 </div>
@@ -554,7 +579,7 @@ export default function PosterDesign() {
                     value={formData.height}
                     onChange={handleInputChange}
                     type="text"
-                    placeholder="600px"
+                    // placeholder="600px"
                     className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                   />
                 </div>
