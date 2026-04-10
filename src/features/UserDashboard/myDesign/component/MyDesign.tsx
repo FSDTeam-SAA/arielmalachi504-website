@@ -299,7 +299,7 @@ export default function MyDesign() {
                   Design Details
                 </h4>
 
-                <div className="rounded-2xl border border-[#dbe7f5] bg-[#edf5ff] p-5">
+                {/* <div className="rounded-2xl border border-[#dbe7f5] bg-[#edf5ff] p-5">
                   <div className="mb-3 flex items-center gap-2 text-[#2196f3]">
                     <Wand2 className="h-5 w-5" />
                     <span className="text-[16px] font-medium">
@@ -310,7 +310,7 @@ export default function MyDesign() {
                     {selectedDesign.prompt ||
                       "No prompt details available for this generation."}
                   </p>
-                </div>
+                </div> */}
 
                 <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <DetailBox
@@ -321,11 +321,11 @@ export default function MyDesign() {
                       "MMM d, yyyy • h:mm a",
                     )}
                   />
-                  <DetailBox
+                  {/* <DetailBox
                     icon={<Tag className="h-5 w-5" />}
                     title="Credit Cost"
                     value={`${selectedDesign.creditCost} Credits`}
-                  />
+                  /> */}
                   <DetailBox
                     icon={<Monitor className="h-5 w-5" />}
                     title="Platform"

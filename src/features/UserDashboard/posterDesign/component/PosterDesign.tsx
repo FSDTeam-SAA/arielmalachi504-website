@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   ImagePlus,
   Sparkles,
@@ -11,10 +11,15 @@ import {
   UploadCloud,
   ArrowLeft,
   Loader2,
+  Download,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAiGenerateFields } from "../hooks/usePosterDesign";
+import {
+  useAiGenerateFields,
+  useInitiatePoster,
+  usePosterResult,
+} from "../hooks/usePosterDesign";
 import CustomizeBrandKit from "./CustomizeBrandKit";
 
 type FormDataType = {
@@ -29,6 +34,8 @@ type FormDataType = {
   width: string;
   height: string;
 };
+
+type ColorEntry = { color: string; hex: string };
 
 const stylePresets = [
   {
@@ -68,36 +75,59 @@ const outputFormats = [
     title: "1:1 Square",
     description: "Instagram Feed",
     bg: "bg-[#e8f5f3]",
+    value: "1:1 square",
   },
   {
     title: "9:16 Story",
     description: "Instagram/FB Story",
     bg: "bg-[#f4f8df]",
+    value: "9:16 story",
   },
   {
     title: "16:9 Square",
     description: "Facebook/Twitter",
     bg: "bg-[#f8ece5]",
+    value: "16:9 landscape",
   },
   {
     title: "4:5 Portrait",
     description: "Instagram Portrait",
     bg: "bg-[#e8f0ff]",
+    value: "4:5 portrait",
   },
+];
+
+const languageOptions = [
+  { id: "hebrew", label: "Hebrew" },
+  { id: "english", label: "English" },
 ];
 
 export default function PosterDesign() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [generationId, setGenerationId] = useState<string | null>(null);
+  const [userSelectedPosterUrl, setUserSelectedPosterUrl] = useState<
+    string | null
+  >(null);
 
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [brandKitEnabled, setBrandKitEnabled] = useState(true);
   const [creditsEnabled, setCreditsEnabled] = useState(true);
   const [isBrandKitModalOpen, setIsBrandKitModalOpen] = useState(false);
+  const [language, setLanguage] = useState("hebrew");
+  const [variations, setVariations] = useState(1);
 
   const [selectedStyle, setSelectedStyle] = useState("Modern Minimal");
-  const [selectedFormat, setSelectedFormat] = useState("1:1 Square");
+  const [selectedFormat, setSelectedFormat] = useState(outputFormats[0]);
+
+  // Brand Kit state — lifted so generate can use them
+  const [brandName, setBrandName] = useState("");
+  const [tagLine, setTagLine] = useState("");
+  const [colors, setColors] = useState<ColorEntry[]>([
+    { color: "#4C8CF0", hex: "#4C8CF0" },
+    { color: "#E52420", hex: "#E52420" },
+  ]);
 
   const [formData, setFormData] = useState<FormDataType>({
     headline: "",
@@ -112,6 +142,24 @@ export default function PosterDesign() {
     height: "600px",
   });
 
+  // Poster result polling
+  const { data: resultData, isError } = usePosterResult(generationId);
+  const isSuccessful = !!resultData?.data?.success;
+  const isProcessing = !!generationId && !isError && !isSuccessful;
+
+  const resultUrls: string[] = useMemo(
+    () => resultData?.data?.resultUrls || [],
+    [resultData],
+  );
+
+  const selectedPosterUrl = useMemo(() => {
+    if (userSelectedPosterUrl && resultUrls.includes(userSelectedPosterUrl)) {
+      return userSelectedPosterUrl;
+    }
+    return resultUrls[0] || null;
+  }, [userSelectedPosterUrl, resultUrls]);
+
+  // Hooks
   const aiGenerateMutation = useAiGenerateFields((data) => {
     setFormData((prev) => ({
       ...prev,
@@ -121,40 +169,30 @@ export default function PosterDesign() {
     }));
   });
 
+  const { mutate: initiatePoster, isPending: isInitiating } =
+    useInitiatePoster();
+
+  // Handlers
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (uploadedImage) {
-      URL.revokeObjectURL(uploadedImage);
-    }
-
+    if (uploadedImage) URL.revokeObjectURL(uploadedImage);
     setUploadedFile(file);
-    const imageUrl = URL.createObjectURL(file);
-    setUploadedImage(imageUrl);
+    setUploadedImage(URL.createObjectURL(file));
   };
 
   const handleRemoveImage = () => {
-    if (uploadedImage) {
-      URL.revokeObjectURL(uploadedImage);
-    }
+    if (uploadedImage) URL.revokeObjectURL(uploadedImage);
     setUploadedImage(null);
     setUploadedFile(null);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleResetFields = () => {
@@ -172,23 +210,62 @@ export default function PosterDesign() {
   };
 
   const handleAiGenerate = () => {
-    if (!formData.businessDescription.trim()) {
-      return;
-    }
+    if (!formData.businessDescription.trim()) return;
     aiGenerateMutation.mutate({ idea: formData.businessDescription });
   };
 
   const handleGenerate = () => {
-    console.log("Poster Design Data:", {
-      uploadedFile,
-      uploadedImage,
-      brandKitEnabled,
-      creditsEnabled,
-      selectedStyle,
-      selectedFormat,
-      ...formData,
+    const primaryColor = colors[0]?.color || "#000000";
+    const secondaryColor = colors[1]?.color || "#ffffff";
+
+    const formDataObj = new FormData();
+    formDataObj.append("title", formData.headline);
+    formDataObj.append("subtitle", formData.subHeadline);
+    formDataObj.append("brand_name", brandName || "My Brand");
+    formDataObj.append("primary_color", primaryColor);
+    formDataObj.append("secondary_color", secondaryColor);
+    if (tagLine) formDataObj.append("tagline", tagLine);
+    if (formData.cta) formDataObj.append("cta", formData.cta);
+    if (formData.phoneNumber) formDataObj.append("phone", formData.phoneNumber);
+    if (formData.address) formDataObj.append("address", formData.address);
+    if (formData.website) formDataObj.append("website", formData.website);
+    if (formData.designStylePrompt)
+      formDataObj.append("design_style_prompt", formData.designStylePrompt);
+    formDataObj.append("style_preset", selectedStyle);
+    formDataObj.append("output_format", selectedFormat.value);
+    formDataObj.append("language", language);
+    formDataObj.append("variations", String(variations));
+    if (uploadedFile) formDataObj.append("image", uploadedFile);
+
+    setGenerationId(null);
+    initiatePoster(formDataObj, {
+      onSuccess: (response) => {
+        if (response?.data?.generationId) {
+          setGenerationId(response.data.generationId);
+        }
+      },
     });
   };
+
+  const handleDownload = async () => {
+    if (!selectedPosterUrl) return;
+    try {
+      const response = await fetch(selectedPosterUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `poster-${generationId || "design"}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
+
+  const isGenerating = isInitiating || isProcessing;
 
   return (
     <section className="min-h-screen bg-[#edf6fb] p-4 md:p-6">
@@ -369,7 +446,7 @@ export default function PosterDesign() {
                     value={formData.designStylePrompt}
                     onChange={handleInputChange}
                     rows={4}
-                    placeholder="e.g. Vibrant Friday night promo with warm red-orange gradient, bold typography, rustic Italian feel, suitable for Facebook feed."
+                    placeholder="e.g. Vibrant Friday night promo with warm red-orange gradient, bold typography, rustic Italian feel."
                     className="w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 py-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                   />
                 </div>
@@ -427,7 +504,7 @@ export default function PosterDesign() {
                       value={formData.address}
                       onChange={handleInputChange}
                       type="text"
-                      placeholder="Dhaka, Bangladesh"
+                      placeholder="USA, New York."
                       className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                     />
                   </div>
@@ -465,7 +542,7 @@ export default function PosterDesign() {
                   value={formData.businessDescription}
                   onChange={handleInputChange}
                   rows={4}
-                  placeholder="e.g. I own an Italian pizza restaurant in New York. I want to promote a Friday night special — Buy 2 large pizzas and get 1 free. Target audience: families and office workers. Warm, exciting mood."
+                  placeholder="e.g. I own an Italian pizza restaurant in New York. I want to promote a Friday night special — Buy 2 large pizzas and get 1 free."
                   className="w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 py-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                 />
               </div>
@@ -536,11 +613,11 @@ export default function PosterDesign() {
                   <button
                     key={format.title}
                     type="button"
-                    onClick={() => setSelectedFormat(format.title)}
+                    onClick={() => setSelectedFormat(format)}
                     className={`rounded-xl p-4 text-left transition hover:scale-[1.01] hover:shadow-sm ${
                       format.bg
                     } ${
-                      selectedFormat === format.title
+                      selectedFormat.title === format.title
                         ? "ring-2 ring-[#5d72ff]"
                         : "ring-1 ring-transparent"
                     }`}
@@ -553,40 +630,89 @@ export default function PosterDesign() {
                     </p>
                   </button>
                 ))}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSelectedFormat({
+                      title: "Custom Size",
+                      description: "Enter your own dimensions",
+                      bg: "bg-[#f5f0ff]",
+                      value: "custom",
+                    })
+                  }
+                  className={`col-span-1 rounded-xl p-4 text-left transition hover:scale-[1.01] hover:shadow-sm bg-[#f5f0ff] sm:col-span-2 ${
+                    selectedFormat.title === "Custom Size"
+                      ? "ring-2 ring-[#5d72ff]"
+                      : "ring-1 ring-transparent"
+                  }`}
+                >
+                  <h4 className="text-[14px] font-semibold text-[#3d4a54]">
+                    Custom Size
+                  </h4>
+                  <p className="mt-1 text-[11px] text-[#7f8a93]">
+                    Enter your own width &amp; height
+                  </p>
+                </button>
               </div>
 
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                    Width
-                  </label>
-                  <input
-                    name="width"
-                    value={formData.width}
-                    onChange={handleInputChange}
-                    type="text"
-                    // placeholder="400px"
-                    className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
-                  />
+              {selectedFormat.title === "Custom Size" && (
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
+                      Width (px)
+                    </label>
+                    <input
+                      name="width"
+                      value={formData.width}
+                      onChange={handleInputChange}
+                      type="text"
+                      placeholder="e.g. 400px"
+                      className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
+                      Height (px)
+                    </label>
+                    <input
+                      name="height"
+                      value={formData.height}
+                      onChange={handleInputChange}
+                      type="text"
+                      placeholder="e.g. 600px"
+                      className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
+                    />
+                  </div>
                 </div>
+              )}
+            </div>
 
-                <div>
-                  <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                    Height
-                  </label>
-                  <input
-                    name="height"
-                    value={formData.height}
-                    onChange={handleInputChange}
-                    type="text"
-                    // placeholder="600px"
-                    className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
-                  />
-                </div>
+            {/* Language */}
+            <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
+              <div className="mb-4 flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
+                <Sparkles className="h-4 w-4 text-[#4f79e8]" />
+                <span>Language</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {languageOptions.map((lang) => (
+                  <button
+                    key={lang.id}
+                    type="button"
+                    onClick={() => setLanguage(lang.id)}
+                    className={`rounded-lg px-3 py-2.5 text-[12px] font-medium transition ${
+                      language === lang.id
+                        ? "bg-[#eef5ff] text-[#4f79e8] ring-1 ring-[#b7d0ff]"
+                        : "bg-[#f7f7f7] text-[#848b92] hover:bg-[#f1f5f9]"
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Credits */}
+            {/* Credits / Variations */}
             <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -594,13 +720,31 @@ export default function PosterDesign() {
                     Credits used = Quantity selected
                   </h4>
                   <p className="mt-1 text-[11px] text-[#8a939a]">
-                    (e.g. 1 post = 1 credit, 15 posts = 15 credits).
+                    (e.g. 1 post = 1 credit, 3 posts = 3 credits).
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="min-w-[90px] rounded-lg bg-[#f6f7f9] px-3 py-2 text-center text-[12px] text-[#a2a9b0]">
-                    Quantity
+                  <div className="flex flex-col items-end gap-1">
+                    <label className="text-[10px] font-medium text-[#9aa1a8]">
+                      Variations
+                    </label>
+                    <input
+                      id="poster-variations"
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={variations}
+                      onChange={(e) =>
+                        setVariations(
+                          Math.max(
+                            1,
+                            Math.min(10, parseInt(e.target.value) || 1),
+                          ),
+                        )
+                      }
+                      className="h-[38px] w-[80px] rounded-lg border border-[#dbe6f0] bg-[#f6f7f9] px-3 text-center text-[14px] font-semibold text-[#4b5563] outline-none transition focus:border-[#635bff] focus:bg-white"
+                    />
                   </div>
 
                   <button
@@ -620,14 +764,23 @@ export default function PosterDesign() {
               </div>
             </div>
 
-            {/* Regenerate Button */}
+            {/* Generate Button */}
             <button
               type="button"
               onClick={handleGenerate}
-              className="inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1fd2ea] via-[#39a9f5] to-[#5d72ff] text-[16px] font-semibold text-white shadow-[0_10px_20px_rgba(80,130,255,0.22)] transition hover:scale-[1.01] hover:opacity-95"
+              disabled={isGenerating || !brandName}
+              className={`inline-flex h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1fd2ea] via-[#39a9f5] to-[#5d72ff] text-[16px] font-semibold text-white shadow-[0_10px_20px_rgba(80,130,255,0.22)] transition hover:scale-[1.01] hover:opacity-95 ${
+                isGenerating || !brandName
+                  ? "cursor-not-allowed opacity-70"
+                  : "cursor-pointer"
+              }`}
             >
-              <Sparkles className="h-4 w-4" />
-              Regenerate Design 1/3
+              {isGenerating ? (
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {isGenerating ? "Generating..." : "Generate Poster"}
             </button>
           </div>
 
@@ -637,27 +790,70 @@ export default function PosterDesign() {
               Preview Output
             </div>
 
-            <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-[#dce6ef] bg-gradient-to-br from-[#fbfdff] to-[#f7fafc] sm:min-h-[520px] xl:min-h-[760px]">
-              {uploadedImage ? (
-                <div className="relative h-full min-h-[420px] w-full sm:min-h-[520px] xl:min-h-[760px]">
-                  <Image
-                    src={uploadedImage}
-                    alt="Preview poster"
-                    fill
-                    className="rounded-2xl object-contain p-4"
-                  />
-                </div>
-              ) : (
-                <div className="text-center text-[#b8bcc2]">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
-                    <ImagePlus className="h-8 w-8 opacity-40" />
+            <div className="flex min-h-[420px] flex-col overflow-hidden rounded-2xl border border-[#dce6ef] bg-white sm:min-h-[520px] xl:min-h-[760px]">
+              {/* Main Preview */}
+              <div className="relative flex-1 overflow-hidden bg-[#f8fafc]">
+                {selectedPosterUrl ? (
+                  <div className="absolute inset-0 flex items-center justify-center p-8">
+                    <div className="relative h-full w-full">
+                      <Image
+                        src={selectedPosterUrl}
+                        alt="Generated poster"
+                        fill
+                        priority
+                        unoptimized
+                        className="object-contain"
+                      />
+                    </div>
                   </div>
-                  <p className="text-[14px] font-medium text-[#8a8f96]">
-                    Your generated poster will appear here
-                  </p>
-                  <p className="mt-1 text-[12px] text-[#c0c4ca]">
-                    Fill in the details and click Generate
-                  </p>
+                ) : (
+                  <div className="flex h-full w-full min-h-[420px] flex-col items-center justify-center p-10 text-center text-[#b8bcc2] sm:min-h-[520px] xl:min-h-[760px]">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
+                      <ImagePlus className="h-8 w-8 opacity-40" />
+                    </div>
+                    <p className="text-[14px] font-medium text-[#8a8f96]">
+                      Your generated poster will appear here
+                    </p>
+                    <p className="mt-1 text-[12px] text-[#c0c4ca]">
+                      Fill in the details and click Generate
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Download & Gallery */}
+              {resultUrls.length > 0 && (
+                <div className="border-t border-[#edf2f7] p-5">
+                  <button
+                    onClick={handleDownload}
+                    className="mb-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#4b8df8] py-3.5 text-[15px] font-semibold text-white transition hover:bg-[#3b7de8]"
+                  >
+                    Download
+                    <Download className="h-4 w-4" />
+                  </button>
+
+                  {resultUrls.length > 1 && (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                      {resultUrls.map((url, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setUserSelectedPosterUrl(url)}
+                          className={`relative aspect-square overflow-hidden rounded-xl border-2 transition ${
+                            selectedPosterUrl === url
+                              ? "border-[#4b8df8] ring-2 ring-[#4b8df8]/20"
+                              : "border-[#e2e8f0] hover:border-[#cbd5e0]"
+                          }`}
+                        >
+                          <Image
+                            src={url}
+                            alt={`Poster option ${idx + 1}`}
+                            fill
+                            className="object-contain p-2"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -668,7 +864,43 @@ export default function PosterDesign() {
       <CustomizeBrandKit
         isOpen={isBrandKitModalOpen}
         onClose={() => setIsBrandKitModalOpen(false)}
+        brandName={brandName}
+        setBrandName={setBrandName}
+        tagLine={tagLine}
+        setTagLine={setTagLine}
+        colors={colors}
+        setColors={setColors}
       />
+
+      {/* Loading Modal Overlay */}
+      {isProcessing && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0f172a]/40 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-[420px] rounded-3xl bg-white p-8 shadow-2xl">
+            <div className="text-center">
+              <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center">
+                <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-[#39a9f5] border-t-transparent"></div>
+                <div className="absolute inset-2 animate-spin rounded-full border-[3px] border-[#1fd2ea] border-t-transparent opacity-60 [animation-direction:reverse]"></div>
+                <Sparkles className="h-8 w-8 text-[#39a9f5]" />
+              </div>
+
+              <h3 className="text-[20px] font-bold text-[#1f2a44]">
+                Generating your poster
+              </h3>
+              <p className="mt-2 text-[14px] text-[#6b7280]">
+                Our AI is crafting your design...
+              </p>
+
+              <div className="mt-8 overflow-hidden rounded-full bg-[#f1f5f9]">
+                <div className="h-1.5 animate-pulse rounded-full bg-gradient-to-r from-[#1fd2ea] to-[#5d72ff]"></div>
+              </div>
+
+              <p className="mt-4 text-[12px] text-[#94a3b8]">
+                This usually takes about 30–60 seconds.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
