@@ -14,91 +14,103 @@ import {
   Loader2,
 } from "lucide-react";
 import { useUserProfileSettings } from "../../settings/hooks/useSettings";
+import { useDashboardOverview } from "../hooks/useDashboardOverview";
 import { useTranslation } from "@/locales";
-
-const stats = [
-  {
-    title: "Designs Created",
-    value: 24,
-    icon: Monitor,
-    iconBg: "bg-[#eaf5ff]",
-    iconColor: "text-[#4ea4ff]",
-  },
-  {
-    title: "Posters",
-    value: 16,
-    icon: FileText,
-    iconBg: "bg-[#eaf5ff]",
-    iconColor: "text-[#4ea4ff]",
-  },
-  {
-    title: "Logos",
-    value: 6,
-    icon: Flag,
-    iconBg: "bg-[#eaf5ff]",
-    iconColor: "text-[#4ea4ff]",
-  },
-  {
-    title: "Banners",
-    value: 2,
-    icon: ImageIcon,
-    iconBg: "bg-[#eaf5ff]",
-    iconColor: "text-[#4ea4ff]",
-  },
-];
-
-const services = [
-  {
-    title: "Poster Design",
-    description: "Create social media posts & promotional posters",
-    icon: FileText,
-    iconBg: "bg-[#eaf5ff]",
-    iconColor: "text-[#4e86f7]",
-    buttonClass: "bg-[#4e86f7] hover:bg-[#3f77e8]",
-    titleClass: "text-[#4e86f7]",
-    borderClass: "border-[#cfe2ff]",
-    path: "/dashboard-overview/poster-design",
-  },
-  {
-    title: "Logo Maker",
-    description: "Generate professional logos for your brand.",
-    icon: Flag,
-    iconBg: "bg-[#e7fbff]",
-    iconColor: "text-[#20cbe3]",
-    buttonClass: "bg-[#20cbe3] hover:bg-[#17bdd4]",
-    titleClass: "text-[#20cbe3]",
-    borderClass: "border-[#d7f6fb]",
-    path: "/dashboard-overview/logo-maker",
-  },
-  {
-    title: "Subscription",
-    description: "Upgrade your plan for unlimited designs .",
-    icon: Zap,
-    iconBg: "bg-[#fff8dd]",
-    iconColor: "text-[#e8bf12]",
-    buttonClass: "bg-[#e8bf12] hover:bg-[#d8b00e]",
-    titleClass: "text-[#e8bf12]",
-    borderClass: "border-[#f3e6b3]",
-    path: "/billing-payments",
-  },
-  {
-    title: "Account Settings",
-    description: "Manage your profile and preferences",
-    icon: Settings,
-    iconBg: "bg-[#efefef]",
-    iconColor: "text-[#7a7a7a]",
-    buttonClass: "bg-[#6f6f6f] hover:bg-[#5f5f5f]",
-    titleClass: "text-[#666666]",
-    borderClass: "border-[#dddddd]",
-    path: "/settings",
-  },
-];
 
 export default function DashboardOverview() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { data, isLoading, isError } = useUserProfileSettings();
-  const profile = data?.data;
+  const {
+    data: profileData,
+    isLoading: isProfileLoading,
+    isError: isProfileError,
+  } = useUserProfileSettings();
+  const {
+    data: overviewData,
+    isLoading: isOverviewLoading,
+    isError: isOverviewError,
+  } = useDashboardOverview();
+
+  const profile = profileData?.data;
+  const statsData = overviewData?.data;
+
+  const stats = [
+    {
+      title: "Designs Created",
+      value: statsData?.totalDesigns || 0,
+      icon: Monitor,
+      iconBg: "bg-[#eaf5ff]",
+      iconColor: "text-[#4ea4ff]",
+    },
+    {
+      title: "Posters",
+      value: statsData?.totalPosters || 0,
+      icon: FileText,
+      iconBg: "bg-[#eaf5ff]",
+      iconColor: "text-[#4ea4ff]",
+    },
+    {
+      title: "Logos",
+      value: statsData?.totalLogos || 0,
+      icon: Flag,
+      iconBg: "bg-[#eaf5ff]",
+      iconColor: "text-[#4ea4ff]",
+    },
+    {
+      title: "Credits Used",
+      value: statsData?.totalCreditsUsed || 0,
+      icon: Zap,
+      iconBg: "bg-[#fff8dd]",
+      iconColor: "text-[#e8bf12]",
+    },
+  ];
+
+  const services = [
+    {
+      title: "Poster Design",
+      description: "Create social media posts & promotional posters",
+      icon: FileText,
+      iconBg: "bg-[#eaf5ff]",
+      iconColor: "text-[#4e86f7]",
+      buttonClass: "bg-[#4e86f7] hover:bg-[#3f77e8]",
+      titleClass: "text-[#4e86f7]",
+      borderClass: "border-[#cfe2ff]",
+      path: "/dashboard-overview/poster-design",
+    },
+    {
+      title: "Logo Maker",
+      description: "Generate professional logos for your brand.",
+      icon: Flag,
+      iconBg: "bg-[#e7fbff]",
+      iconColor: "text-[#20cbe3]",
+      buttonClass: "bg-[#20cbe3] hover:bg-[#17bdd4]",
+      titleClass: "text-[#20cbe3]",
+      borderClass: "border-[#d7f6fb]",
+      path: "/dashboard-overview/logo-maker",
+    },
+    {
+      title: "Subscription",
+      description: "Upgrade your plan for unlimited designs .",
+      icon: Zap,
+      iconBg: "bg-[#fff8dd]",
+      iconColor: "text-[#e8bf12]",
+      buttonClass: "bg-[#e8bf12] hover:bg-[#d8b00e]",
+      titleClass: "text-[#e8bf12]",
+      borderClass: "border-[#f3e6b3]",
+      path: "/billing-payments",
+    },
+    {
+      title: "Account Settings",
+      description: "Manage your profile and preferences",
+      icon: Settings,
+      iconBg: "bg-[#efefef]",
+      iconColor: "text-[#7a7a7a]",
+      buttonClass: "bg-[#6f6f6f] hover:bg-[#5f5f5f]",
+      titleClass: "text-[#666666]",
+      borderClass: "border-[#dddddd]",
+      path: "/settings",
+    },
+  ];
 
   return (
     <section className="min-h-screen p-4 md:p-6">
@@ -109,26 +121,39 @@ export default function DashboardOverview() {
           </h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {stats.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.title}
-                  className="rounded-lg border border-[#d8ebf6] bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.03)]"
-                >
+            {isOverviewLoading
+              ? Array.from({ length: 4 }).map((_, i) => (
                   <div
-                    className={`mb-5 flex h-8 w-8 items-center justify-center rounded-md ${item.iconBg}`}
+                    key={i}
+                    className="animate-pulse rounded-lg border border-[#d8ebf6] bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.03)]"
                   >
-                    <Icon className={`h-4 w-4 ${item.iconColor}`} />
+                    <div className="mb-5 h-8 w-8 rounded-md bg-gray-200" />
+                    <div className="h-8 w-16 rounded bg-gray-200" />
+                    <div className="mt-2 h-4 w-24 rounded bg-gray-200" />
                   </div>
+                ))
+              : stats.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div
+                      key={item.title}
+                      className="rounded-lg border border-[#d8ebf6] bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.03)]"
+                    >
+                      <div
+                        className={`mb-5 flex h-8 w-8 items-center justify-center rounded-md ${item.iconBg}`}
+                      >
+                        <Icon className={`h-4 w-4 ${item.iconColor}`} />
+                      </div>
 
-                  <div className="text-[34px] font-medium leading-none text-[#444]">
-                    {item.value}
-                  </div>
-                  <p className="mt-2 text-[18px] text-[#666]">{item.title}</p>
-                </div>
-              );
-            })}
+                      <div className="text-[34px] font-medium leading-none text-[#444]">
+                        {item.value}
+                      </div>
+                      <p className="mt-2 text-[18px] text-[#666]">
+                        {item.title}
+                      </p>
+                    </div>
+                  );
+                })}
           </div>
         </div>
 
@@ -138,12 +163,12 @@ export default function DashboardOverview() {
           </h2>
 
           <div className="rounded-lg border border-[#e2edf4] bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.03)] min-h-[160px] flex items-center justify-center">
-            {isLoading ? (
+            {isProfileLoading ? (
               <div className="flex flex-col items-center gap-2 text-[#777]">
                 <Loader2 className="h-8 w-8 animate-spin text-[#22c8ea]" />
                 <p className="text-sm">Loading profile data...</p>
               </div>
-            ) : isError || !profile ? (
+            ) : isProfileError || !profile ? (
               <div className="text-red-500 font-medium">
                 Failed to load profile information.
               </div>

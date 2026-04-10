@@ -6,12 +6,13 @@ import Features from "@/features/website/component/Features";
 import HowItWorksSection from "@/features/website/component/HowItWorksSection";
 import Creation from "@/features/website/component/Creation";
 import Design from "@/features/website/component/Design";
+import Slider from "@/features/website/component/Slider";
 
 export default function Home() {
   return (
     <div className="flex flex-col">
       <Banner />
-      {/* <Slider /> */}
+      <Slider />
       <Features />
       <Creation />
       <div className="space-y-10">

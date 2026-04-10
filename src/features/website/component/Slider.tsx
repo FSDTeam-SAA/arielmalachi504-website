@@ -1,144 +1,211 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
-const ads = [
-  {
-    title: "Chocolate Special",
-    image:
-      "https://images.unsplash.com/photo-1582176604445-667dc9ac3e07?q=80&w=2426&auto=format&fit=crop",
-  },
-  {
-    title: "Heated",
-    image:
-      "https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=2426&auto=format&fit=crop",
-  },
-  {
-    title: "Hot & Crispy Samosa",
-    image:
-      "https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    title: "Time is Power",
-    image:
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=2426&auto=format&fit=crop",
-  },
-  {
-    title: "Wireless Headphone",
-    image:
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2426&auto=format&fit=crop",
-  },
+const slides = [
+  { id: 1, src: "/images/chocolate.png", alt: "Chocolate" },
+  { id: 2, src: "/images/heated.png", alt: "Heated" },
+  { id: 3, src: "/images/samosa.png", alt: "Samosa" },
+  { id: 4, src: "/images/timeIsPower.png", alt: "Time is Power" },
+  { id: 5, src: "/images/headphone.png", alt: "Headphone" },
+  { id: 6, src: "/images/pizza.png", alt: "Pizza" },
+  { id: 7, src: "/images/burger.png", alt: "Burger" },
+  { id: 8, src: "/images/coffe.png", alt: "Coffee" },
 ];
 
-const getCardStyle = (index: number, centerIndex: number) => {
-  const diff = index - centerIndex;
-
-  const styles = [
-    {
-      rotate: -14,
-      translateY: 8,
-      translateX: 70,
-      scale: 0.9,
-      zIndex: 1,
-      opacity: 0.85,
-    },
-    {
-      rotate: -7,
-      translateY: 2,
-      translateX: 35,
-      scale: 0.95,
-      zIndex: 2,
-      opacity: 0.92,
-    },
-    {
-      rotate: 0,
-      translateY: 0,
-      translateX: 0,
-      scale: 1,
-      zIndex: 5,
-      opacity: 1,
-    },
-    {
-      rotate: 7,
-      translateY: 2,
-      translateX: -35,
-      scale: 0.95,
-      zIndex: 2,
-      opacity: 0.92,
-    },
-    {
-      rotate: 14,
-      translateY: 8,
-      translateX: -70,
-      scale: 0.9,
-      zIndex: 1,
-      opacity: 0.85,
-    },
-  ];
-
-  return (
-    styles[index] ?? {
-      rotate: diff * 8,
-      translateY: Math.abs(diff) * 4,
-      translateX: diff * -30,
-      scale: 1 - Math.abs(diff) * 0.05,
-      zIndex: 1,
-      opacity: 0.85,
-    }
-  );
-};
-
 export default function Slider() {
-  const centerIndex = Math.floor(ads.length / 2);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+
+  const total = slides.length;
+
+  const getIndex = (offset: number) =>
+    (((activeIndex + offset) % total) + total) % total;
+
+  const next = useCallback(() => {
+    setDirection(1);
+    setActiveIndex((prev) => (prev + 1) % total);
+  }, [total]);
+
+  const prev = useCallback(() => {
+    setDirection(-1);
+    setActiveIndex((prev) => (((prev - 1) % total) + total) % total);
+  }, [total]);
+
+  // Auto-play
+  useEffect(() => {
+    const timer = setInterval(next, 3500);
+    return () => clearInterval(timer);
+  }, [next]);
+
+  // Visible cards: positions from -2 to +2
+  const positions = [-2, -1, 0, 1, 2];
+
+  const getCardStyle = (position: number) => {
+    const absPos = Math.abs(position);
+
+    // 3D transform values
+    const rotateY = position * -25;
+    const translateX = position * 220;
+    const translateZ = absPos === 0 ? 200 : absPos === 1 ? 50 : -100;
+    const scale = absPos === 0 ? 1 : absPos === 1 ? 0.85 : 0.7;
+    const opacity = absPos === 0 ? 1 : absPos === 1 ? 0.8 : 0.5;
+    const zIndex = 10 - absPos * 2;
+
+    return {
+      rotateY,
+      x: translateX,
+      z: translateZ,
+      scale,
+      opacity,
+      zIndex,
+    };
+  };
 
   return (
-    <section className="w-full bg-white py-10 md:py-16 overflow-hidden">
-      <div className="mx-auto max-w-[1400px] px-3 md:px-6">
-        <div className="relative flex items-center justify-center min-h-[260px] md:min-h-[520px]">
-          {ads.map((ad, index) => {
-            const card = getCardStyle(index, centerIndex);
+    <section className="relative w-full py-6 overflow-hidden  ">
+      <div className="px-4">
+        {/* 3D Carousel */}
+        <div
+          className="relative flex items-center justify-center"
+          style={{ perspective: "900px", height: "520px" }}
+        >
+          <div
+            className="relative w-full flex items-center justify-center"
+            style={{ transformStyle: "preserve-3d" }}
+          >
+            <AnimatePresence mode="popLayout">
+              {positions.map((position) => {
+                const slideIndex = getIndex(position);
+                const slide = slides[slideIndex];
+                const style = getCardStyle(position);
 
-            return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30, scale: 0.9 }}
-                whileInView={{
-                  opacity: card.opacity,
-                  y: 0,
-                  scale: card.scale,
-                  rotate: card.rotate,
-                  x: card.translateX,
+                return (
+                  <motion.div
+                    key={`${slide.id}-${position}`}
+                    className="absolute cursor-pointer"
+                    initial={{
+                      rotateY: style.rotateY + direction * 25,
+                      x: style.x + direction * 220,
+                      scale: style.scale * 0.8,
+                      opacity: 0,
+                    }}
+                    animate={{
+                      rotateY: style.rotateY,
+                      x: style.x,
+                      scale: style.scale,
+                      opacity: style.opacity,
+                      zIndex: style.zIndex,
+                    }}
+                    exit={{
+                      rotateY: style.rotateY - direction * 25,
+                      x: style.x - direction * 220,
+                      scale: style.scale * 0.8,
+                      opacity: 0,
+                    }}
+                    transition={{
+                      duration: 0.6,
+                      ease: [0.32, 0.72, 0, 1],
+                    }}
+                    style={{
+                      transformStyle: "preserve-3d",
+                      zIndex: style.zIndex,
+                    }}
+                    onClick={() => {
+                      if (position > 0) next();
+                      if (position < 0) prev();
+                    }}
+                  >
+                    <div
+                      className={`relative w-[240px] h-[340px] md:w-[360px] md:h-[450px] rounded-2xl overflow-hidden shadow-2xl
+                        ${position === 0 ? "ring-2 ring-[#00F6FF]/40 shadow-[0_0_40px_rgba(0,246,255,0.15)]" : ""}
+                      `}
+                    >
+                      <Image
+                        src={slide.src}
+                        alt={slide.alt}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 240px, 260px"
+                        priority={Math.abs(position) <= 1}
+                      />
+                      {/* Gradient overlay on side cards */}
+                      {position !== 0 && (
+                        <div className="absolute inset-0 bg-black/30" />
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <div className="flex items-center justify-center gap-6 mt-8">
+          <button
+            onClick={prev}
+            className="group w-12 h-12 rounded-full border border-white/20 flex items-center justify-center
+              hover:border-[#00F6FF] hover:bg-[#00F6FF]/10 transition-all duration-300"
+            aria-label="Previous slide"
+          >
+            <svg
+              className="w-5 h-5 text-white/70 group-hover:text-[#00F6FF] transition-colors"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+
+          {/* Dots */}
+          <div className="flex items-center gap-2">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  const diff = i - activeIndex;
+                  setDirection(diff > 0 ? 1 : -1);
+                  setActiveIndex(i);
                 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.08 }}
-                whileHover={{
-                  y: -8,
-                  scale: card.scale + 0.03,
-                }}
-                className="absolute"
-                style={{ zIndex: card.zIndex }}
-              >
-                <div className="relative w-[120px] h-[180px] sm:w-[150px] sm:h-[220px] md:w-[220px] md:h-[330px] lg:w-[260px] lg:h-[390px] rounded-[8px] md:rounded-[10px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.18)] bg-neutral-200">
-                  <Image
-                    src={ad.image}
-                    alt={ad.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 150px, 260px"
-                  />
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === activeIndex
+                    ? "w-8 bg-[#00F6FF]"
+                    : "w-2 bg-white/30 hover:bg-white/50"
+                }`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-
-                  <div className="absolute left-0 right-0 bottom-0 p-3 md:p-5">
-                    <h3 className="text-white text-xs sm:text-sm md:text-xl font-bold leading-tight">
-                      {ad.title}
-                    </h3>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+          <button
+            onClick={next}
+            className="group w-12 h-12 rounded-full border border-white/20 flex items-center justify-center
+              hover:border-[#00F6FF] hover:bg-[#00F6FF]/10 transition-all duration-300"
+            aria-label="Next slide"
+          >
+            <svg
+              className="w-5 h-5 text-white/70 group-hover:text-[#00F6FF] transition-colors"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     </section>
