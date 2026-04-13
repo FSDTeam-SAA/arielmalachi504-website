@@ -101,7 +101,7 @@ const palettePresets = [
     colors: ["#C40039", "#D93C7F", "#E765B2"],
   },
   {
-    name: "Monochrome",
+    name: "Dark Mono",
     colors: ["#0F172A", "#6B7280", "#E5E7EB"],
   },
 ];
@@ -531,7 +531,12 @@ export default function LogoDesign() {
                   <button
                     key={preset.name + preset.colors.join("")}
                     type="button"
-                    onClick={() => setSelectedPalette(preset.name)}
+                    onClick={() => {
+                      setSelectedPalette(preset.name);
+                      setCustomColors(
+                        preset.colors.map((c) => ({ color: c, hex: c })),
+                      );
+                    }}
                     className={`rounded-xl border bg-white p-3 text-left shadow-[0_6px_16px_rgba(44,87,140,0.04)] transition hover:shadow-[0_8px_18px_rgba(44,87,140,0.08)] ${
                       selectedPalette === preset.name
                         ? "border-[#8cb7ff] ring-2 ring-[#cfe0ff]"
