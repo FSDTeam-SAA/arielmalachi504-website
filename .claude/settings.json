@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /home/rasel/Rasel/FSD/arielmalachi504-website/src -type f \\\\\\( -name \"*.ts\" -o -name \"*.tsx\" \\\\\\) -exec grep -l \"Features\\\\|תכונות\\\\|features\" {} \\\\;)"
+    ]
+  }
+}
