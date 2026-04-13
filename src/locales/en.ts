@@ -183,6 +183,65 @@ export const en = {
     body: "Creating eye-catching posters and unforgettable logos no longer requires complex design tools or professional experience. Our AI platform allows you to turn simple ideas into visually stunning designs in seconds.",
     cta: "Create Your Design",
   },
+  features: {
+    badge: "Features",
+    title: "Everything you need to stand out",
+    subtitle:
+      "A complete AI design toolkit built especially for business owners with no design experience required.",
+    items: [
+      {
+        title: "AI Generation",
+        description:
+          "Create professional designs instantly by describing your idea in words.",
+      },
+      {
+        title: "Size Customization",
+        description:
+          "Customize your design dimensions to fit social media, posters, or banners.",
+      },
+      {
+        title: "Style Control",
+        description:
+          "Control the visual style of your design to create the exact result you want.",
+      },
+      {
+        title: "Subscription Access",
+        description:
+          "Unlock unlimited designs, premium styles, and priority creation.",
+      },
+      {
+        title: "Poster Design",
+        description:
+          "Create professional poster designs instantly using simple text prompts.",
+      },
+      {
+        title: "Logo Design",
+        description:
+          "Create a unique and professional logo for your brand in seconds.",
+      },
+      {
+        title: "Edit Prompt",
+        description:
+          "Adjust your prompt and let AI create new versions of your design.",
+      },
+    ],
+  },
+  footer: {
+    product: "Product",
+    posterDesign: "Poster Design",
+    logoDesign: "Logo Design",
+    legal: "Legal",
+    terms: "Terms & Conditions",
+    privacy: "Privacy Policy",
+    cookies: "Cookie Policy",
+    contact: "Contact Us",
+    address: "San Francisco, California,",
+    addressLine2: "123 AI Avenue",
+    emailPlaceholder: "Enter your email",
+    subscribe: "Subscribe",
+    copyright: "© 2026 Craft ad AI. All rights reserved.",
+    builtFor: "Built for business owners who want to stand out.",
+  },
   design: {
     badge: "Design",
     title: "AI Crafted Designs",

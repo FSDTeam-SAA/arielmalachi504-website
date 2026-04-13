@@ -1,10 +1,15 @@
 "use client";
 
 import { Mail, Phone, MapPin } from "lucide-react";
+import { useTranslation } from "@/locales";
 
 export default function Footer() {
+  const { t, language } = useTranslation();
+  const dir = language === "he" ? "rtl" : "ltr";
+  const textAlign = language === "he" ? "text-right" : "text-left";
+
   return (
-    <footer className="bg-[#111827] pt-20 pb-10 text-white">
+    <footer dir={dir} className="bg-[#111827] pt-20 pb-10 text-white">
       <div className="container mx-auto px-4">
         <div className="mb-16 grid grid-cols-1 gap-12 text-center md:grid-cols-2 md:text-left lg:grid-cols-5">
           {/* Logo Section */}
@@ -21,14 +26,16 @@ export default function Footer() {
 
           {/* Product Section */}
           <div className="flex flex-col items-center md:items-start">
-            <h3 className="mb-8 text-lg font-bold text-white">מוצר</h3>
+            <h3 className="mb-8 text-lg font-bold text-white">
+              {t.footer.product}
+            </h3>
             <ul className="space-y-4">
               <li>
                 <a
                   href="#"
                   className="text-gray-400 transition-colors hover:text-white"
                 >
-                  עיצוב פוסטרים
+                  {t.footer.posterDesign}
                 </a>
               </li>
               <li>
@@ -36,7 +43,7 @@ export default function Footer() {
                   href="#"
                   className="text-gray-400 transition-colors hover:text-white"
                 >
-                  עיצוב לוגו
+                  {t.footer.logoDesign}
                 </a>
               </li>
             </ul>
@@ -44,14 +51,16 @@ export default function Footer() {
 
           {/* Legal Section */}
           <div className="flex flex-col items-center md:items-start">
-            <h3 className="mb-8 text-lg font-bold text-white">חוקי</h3>
+            <h3 className="mb-8 text-lg font-bold text-white">
+              {t.footer.legal}
+            </h3>
             <ul className="space-y-4">
               <li>
                 <a
                   href="#"
                   className="text-gray-400 transition-colors hover:text-white"
                 >
-                  תנאים והגבלות
+                  {t.footer.terms}
                 </a>
               </li>
               <li>
@@ -59,7 +68,7 @@ export default function Footer() {
                   href="#"
                   className="text-gray-400 transition-colors hover:text-white"
                 >
-                  מדיניות פרטיות
+                  {t.footer.privacy}
                 </a>
               </li>
               <li>
@@ -67,7 +76,7 @@ export default function Footer() {
                   href="#"
                   className="text-gray-400 transition-colors hover:text-white"
                 >
-                  מדיניות עוגיות
+                  {t.footer.cookies}
                 </a>
               </li>
             </ul>
@@ -75,26 +84,30 @@ export default function Footer() {
 
           {/* Contact Section */}
           <div className="flex flex-col items-center md:items-start">
-            <h3 className="mb-8 text-lg font-bold text-white">צור קשר</h3>
+            <h3 className="mb-8 text-lg font-bold text-white">
+              {t.footer.contact}
+            </h3>
             <ul className="space-y-4">
               <li className="flex flex-col items-center gap-2 text-gray-400 md:flex-row md:justify-between md:gap-3">
                 <Mail className="h-5 w-5 text-gray-400" />
-                <span className="text-center md:flex-1 md:text-right">
+                <span className={`text-center md:flex-1 md:${textAlign}`}>
                   support@gmail.com
                 </span>
               </li>
 
               <li className="flex flex-col items-center gap-2 text-gray-400 md:flex-row md:justify-between md:gap-3">
                 <Phone className="h-5 w-5 text-gray-400" />
-                <span className="text-center md:flex-1 md:text-right">
+                <span className={`text-center md:flex-1 md:${textAlign}`}>
                   +888 345 455
                 </span>
               </li>
 
               <li className="flex flex-col items-center gap-2 text-gray-400 md:flex-row md:justify-between md:gap-3">
                 <MapPin className="h-5 w-5 text-gray-400 md:self-start" />
-                <span className="text-center text-sm leading-relaxed whitespace-pre-line md:flex-1 md:text-right">
-                  סן פרנסיסקו, קליפורניה, <br /> 123 AI Avenue
+                <span
+                  className={`text-center text-sm leading-relaxed whitespace-pre-line md:flex-1 md:${textAlign}`}
+                >
+                  {t.footer.address} <br /> {t.footer.addressLine2}
                 </span>
               </li>
             </ul>
@@ -105,11 +118,11 @@ export default function Footer() {
             <div className="relative flex items-center p-1 border border-gray-700 rounded-xl bg-gray-900/50">
               <input
                 type="email"
-                placeholder="הזן את המייל שלך"
-                className="bg-transparent border-none outline-none px-4 py-2 text-white placeholder-gray-500 w-full text-right"
+                placeholder={t.footer.emailPlaceholder}
+                className={`bg-transparent border-none outline-none px-4 py-2 text-white placeholder-gray-500 w-full ${language === "he" ? "text-right" : "text-left"}`}
               />
               <button className="bg-gradient-to-r from-[#00F6FF] to-[#4481EB] text-white px-6 py-2.5 rounded-lg font-bold whitespace-nowrap hover:shadow-lg hover:shadow-cyan-500/20 transition-all">
-                הכנס
+                {t.footer.subscribe}
               </button>
             </div>
           </div>
@@ -120,8 +133,8 @@ export default function Footer() {
 
         {/* Bottom Attribution */}
         <div className="flex flex-col items-center justify-center gap-4 text-center text-sm font-medium text-gray-500 md:flex-row md:justify-between">
-          <p>© 2026 Craft ad AI. כל הזכויות שמורות.</p>
-          <p>נבנה עבור בעלי עסקים שרוצים לבלוט.</p>
+          <p>{t.footer.copyright}</p>
+          <p>{t.footer.builtFor}</p>
         </div>
       </div>
     </footer>
