@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import {
   ImagePlus,
   Sparkles,
@@ -21,6 +21,8 @@ import {
   usePosterResult,
 } from "../hooks/usePosterDesign";
 import CustomizeBrandKit from "./CustomizeBrandKit";
+import { Language, useLanguageStore } from "@/store/language.store";
+import { translations } from "@/locales";
 
 type FormDataType = {
   headline: string;
@@ -37,65 +39,7 @@ type FormDataType = {
 
 type ColorEntry = { color: string; hex: string };
 
-const stylePresets = [
-  {
-    title: "Modern Minimal",
-    description: "Clean lines, lots of white space",
-    bg: "bg-[#eef7f4]",
-  },
-  {
-    title: "Bold & Vibrant",
-    description: "Strong colors, high contrast",
-    bg: "bg-[#fdeff4]",
-  },
-  {
-    title: "Dark Tech",
-    description: "Futuristic, sleek dark theme",
-    bg: "bg-[#f5f8e8]",
-  },
-  {
-    title: "Fun & Playful",
-    description: "Bright colors, rounded shapes",
-    bg: "bg-[#fff4ec]",
-  },
-  {
-    title: "Corporate Blue",
-    description: "Professional, trustworthy",
-    bg: "bg-[#edf4ff]",
-  },
-  {
-    title: "Luxury Premium",
-    description: "Dark tones, gold accents",
-    bg: "bg-[#f7eef9]",
-  },
-];
-
-const outputFormats = [
-  {
-    title: "1:1 Square",
-    description: "Instagram Feed",
-    bg: "bg-[#e8f5f3]",
-    value: "1:1 square",
-  },
-  {
-    title: "9:16 Story",
-    description: "Instagram/FB Story",
-    bg: "bg-[#f4f8df]",
-    value: "9:16 story",
-  },
-  {
-    title: "16:9 Square",
-    description: "Facebook/Twitter",
-    bg: "bg-[#f8ece5]",
-    value: "16:9 landscape",
-  },
-  {
-    title: "4:5 Portrait",
-    description: "Instagram Portrait",
-    bg: "bg-[#e8f0ff]",
-    value: "4:5 portrait",
-  },
-];
+// Pre-localized constants
 
 const languageOptions = [
   { id: "hebrew", label: "Hebrew" },
@@ -103,6 +47,91 @@ const languageOptions = [
 ];
 
 export default function PosterDesign() {
+  const { language: globalLanguage } = useLanguageStore();
+  const [language, setLanguage] = useState<Language>(globalLanguage);
+
+  useEffect(() => {
+    setLanguage(globalLanguage);
+  }, [globalLanguage]);
+
+  const t = translations[language];
+
+  const stylePresets = useMemo(
+    () => [
+      {
+        id: "Modern Minimal",
+        title: t.posterMaker.styles.modern.title,
+        description: t.posterMaker.styles.modern.description,
+        bg: "bg-[#eef7f4]",
+      },
+      {
+        id: "Bold & Vibrant",
+        title: t.posterMaker.styles.bold.title,
+        description: t.posterMaker.styles.bold.description,
+        bg: "bg-[#fdeff4]",
+      },
+      {
+        id: "Dark Tech",
+        title: t.posterMaker.styles.dark.title,
+        description: t.posterMaker.styles.dark.description,
+        bg: "bg-[#f5f8e8]",
+      },
+      {
+        id: "Fun & Playful",
+        title: t.posterMaker.styles.fun.title,
+        description: t.posterMaker.styles.fun.description,
+        bg: "bg-[#fff4ec]",
+      },
+      {
+        id: "Corporate Blue",
+        title: t.posterMaker.styles.corporate.title,
+        description: t.posterMaker.styles.corporate.description,
+        bg: "bg-[#edf4ff]",
+      },
+      {
+        id: "Luxury Premium",
+        title: t.posterMaker.styles.luxury.title,
+        description: t.posterMaker.styles.luxury.description,
+        bg: "bg-[#f7eef9]",
+      },
+    ],
+    [t],
+  );
+
+  const outputFormats = useMemo(
+    () => [
+      {
+        id: "square",
+        title: t.posterMaker.formats.square.title,
+        description: t.posterMaker.formats.square.description,
+        bg: "bg-[#e8f5f3]",
+        value: "1:1 square",
+      },
+      {
+        id: "story",
+        title: t.posterMaker.formats.story.title,
+        description: t.posterMaker.formats.story.description,
+        bg: "bg-[#f4f8df]",
+        value: "9:16 story",
+      },
+      {
+        id: "landscape",
+        title: t.posterMaker.formats.landscape.title,
+        description: t.posterMaker.formats.landscape.description,
+        bg: "bg-[#f8ece5]",
+        value: "16:9 landscape",
+      },
+      {
+        id: "portrait",
+        title: t.posterMaker.formats.portrait.title,
+        description: t.posterMaker.formats.portrait.description,
+        bg: "bg-[#e8f0ff]",
+        value: "4:5 portrait",
+      },
+    ],
+    [t],
+  );
+
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [generationId, setGenerationId] = useState<string | null>(null);
@@ -115,11 +144,16 @@ export default function PosterDesign() {
   const [brandKitEnabled, setBrandKitEnabled] = useState(true);
   const [creditsEnabled, setCreditsEnabled] = useState(true);
   const [isBrandKitModalOpen, setIsBrandKitModalOpen] = useState(false);
-  const [language, setLanguage] = useState("hebrew");
   const [variations, setVariations] = useState(1);
 
   const [selectedStyle, setSelectedStyle] = useState("Modern Minimal");
-  const [selectedFormat, setSelectedFormat] = useState(outputFormats[0]);
+  const [selectedFormatId, setSelectedFormatId] = useState("square");
+
+  const selectedFormat = useMemo(
+    () =>
+      outputFormats.find((f) => f.id === selectedFormatId) || outputFormats[0],
+    [selectedFormatId, outputFormats],
+  );
 
   // Brand Kit state — lifted so generate can use them
   const [brandName, setBrandName] = useState("");
@@ -233,7 +267,8 @@ export default function PosterDesign() {
       formDataObj.append("design_style_prompt", formData.designStylePrompt);
     formDataObj.append("style_preset", selectedStyle);
     formDataObj.append("output_format", selectedFormat.value);
-    formDataObj.append("language", language);
+    const langMap = { en: "english", he: "hebrew" };
+    formDataObj.append("language", langMap[language] || "hebrew");
     formDataObj.append("variations", String(variations));
     if (uploadedFile) formDataObj.append("image", uploadedFile);
 
@@ -278,7 +313,7 @@ export default function PosterDesign() {
             <ArrowLeft className="h-5 w-5" />
           </button>
           <h1 className="text-[24px] font-bold text-[#1f2a44]">
-            Poster Design
+            {t.posterMaker.title}
           </h1>
         </div>
 
@@ -289,7 +324,7 @@ export default function PosterDesign() {
             <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
               <div className="mb-3 flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                 <ImagePlus className="h-4 w-4 text-[#5b8def]" />
-                <span>Upload Image</span>
+                <span>{t.posterMaker.uploadImage}</span>
               </div>
 
               <input
@@ -328,10 +363,10 @@ export default function PosterDesign() {
                     </div>
                     <div className="text-center">
                       <p className="text-sm font-medium text-[#51606d]">
-                        Click to upload an image
+                        {t.posterMaker.uploadLabel}
                       </p>
                       <p className="mt-1 text-xs text-[#91a0ae]">
-                        PNG, JPG, JPEG supported
+                        {t.posterMaker.uploadHint}
                       </p>
                     </div>
                   </button>
@@ -345,7 +380,7 @@ export default function PosterDesign() {
                   className="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#eef5ff] px-4 py-2 text-sm font-medium text-[#4f79e8] transition hover:bg-[#e3eeff]"
                 >
                   <UploadCloud className="h-4 w-4" />
-                  Change Image
+                  {t.posterMaker.changeImage}
                 </button>
               )}
             </div>
@@ -356,10 +391,10 @@ export default function PosterDesign() {
                 <div>
                   <div className="flex items-center gap-2 text-[14px] font-semibold text-[#6a63ff]">
                     <Palette className="h-4 w-4" />
-                    <span>Brand Kit</span>
+                    <span>{t.posterMaker.brandKit.title}</span>
                   </div>
                   <p className="mt-1 text-[12px] text-[#8a939a]">
-                    Manage your brand&apos;s unique assets.
+                    {t.posterMaker.brandKit.subtitle}
                   </p>
                 </div>
 
@@ -383,7 +418,7 @@ export default function PosterDesign() {
                     onClick={() => setIsBrandKitModalOpen(true)}
                     className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#635bff] px-4 py-2 text-[12px] font-medium text-white transition hover:bg-[#574ff2]"
                   >
-                    Customize
+                    {t.posterMaker.brandKit.customize}
                     <Sparkles className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -395,7 +430,7 @@ export default function PosterDesign() {
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                   <Wand2 className="h-4 w-4 text-[#4cc56a]" />
-                  <span>Content Fields — (all optional)</span>
+                  <span>{t.posterMaker.contentFields}</span>
                 </div>
 
                 <button
@@ -404,57 +439,56 @@ export default function PosterDesign() {
                   className="inline-flex items-center gap-1 rounded-lg border border-[#ffd7d7] px-2.5 py-1.5 text-[10px] text-[#ff5e5e] transition hover:bg-[#fff7f7]"
                 >
                   <RotateCcw className="h-3 w-3" />
-                  Reset Fields
+                  {t.posterMaker.resetFields}
                 </button>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                    Headline / Title
+                    {t.posterMaker.headline}
                   </label>
                   <input
                     name="headline"
                     value={formData.headline}
                     onChange={handleInputChange}
                     type="text"
-                    placeholder="e.g. Buy 2 Get 1 Free — This Friday Only!"
+                    placeholder={t.posterMaker.headlinePlaceholder}
                     className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                   />
                 </div>
 
                 <div>
                   <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                    Sub-Headline
+                    {t.posterMaker.subHeadline}
                   </label>
                   <input
                     name="subHeadline"
                     value={formData.subHeadline}
                     onChange={handleInputChange}
                     type="text"
-                    placeholder="e.g. Limited time offer. Valid in-store and online."
+                    placeholder={t.posterMaker.subHeadlinePlaceholder}
                     className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                   />
                 </div>
 
                 <div>
                   <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                    Design Style Prompt
+                    {t.posterMaker.designPrompt}
                   </label>
                   <textarea
                     name="designStylePrompt"
                     value={formData.designStylePrompt}
                     onChange={handleInputChange}
                     rows={4}
-                    placeholder="e.g. Vibrant Friday night promo with warm red-orange gradient, bold typography, rustic Italian feel."
+                    placeholder={t.posterMaker.designPlaceholder}
                     className="w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 py-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                   />
                 </div>
               </div>
 
               <p className="mt-3 text-[11px] text-[#8d9399]">
-                Be specific about colors, mood, and target platform for best
-                results.
+                {t.posterMaker.designHint}
               </p>
             </div>
 
@@ -462,20 +496,20 @@ export default function PosterDesign() {
             <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
               <div className="mb-4 flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                 <Sparkles className="h-4 w-4 text-[#6b8eff]" />
-                <span>Additional Information</span>
+                <span>{t.posterMaker.additionalInfo}</span>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                    Call to Action (CTA)
+                    {t.posterMaker.cta}
                   </label>
                   <input
                     name="cta"
                     value={formData.cta}
                     onChange={handleInputChange}
                     type="text"
-                    placeholder="e.g. Order Now | Call Us | Visit Today"
+                    placeholder={t.posterMaker.ctaPlaceholder}
                     className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                   />
                 </div>
@@ -483,7 +517,7 @@ export default function PosterDesign() {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div>
                     <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                      Phone Number
+                      {t.posterMaker.phone}
                     </label>
                     <input
                       name="phoneNumber"
@@ -497,7 +531,7 @@ export default function PosterDesign() {
 
                   <div>
                     <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                      Address
+                      {t.posterMaker.address}
                     </label>
                     <input
                       name="address"
@@ -511,7 +545,7 @@ export default function PosterDesign() {
 
                   <div>
                     <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                      Website / URL
+                      {t.posterMaker.website}
                     </label>
                     <input
                       name="website"
@@ -530,19 +564,19 @@ export default function PosterDesign() {
             <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
               <div className="mb-4 flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                 <Sparkles className="h-4 w-4 text-[#6adf7d]" />
-                <span>AI Content Assistant</span>
+                <span>{t.posterMaker.aiAssistant.title}</span>
               </div>
 
               <div>
                 <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                  Describe your business, offer, or campaign idea
+                  {t.posterMaker.aiAssistant.label}
                 </label>
                 <textarea
                   name="businessDescription"
                   value={formData.businessDescription}
                   onChange={handleInputChange}
                   rows={4}
-                  placeholder="e.g. I own an Italian pizza restaurant in New York. I want to promote a Friday night special — Buy 2 large pizzas and get 1 free."
+                  placeholder={t.posterMaker.aiAssistant.placeholder}
                   className="w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 py-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                 />
               </div>
@@ -559,8 +593,8 @@ export default function PosterDesign() {
                   <Sparkles className="h-4 w-4" />
                 )}
                 {aiGenerateMutation.isPending
-                  ? "Generating Content..."
-                  : "Generate Content with AI"}
+                  ? t.posterMaker.aiAssistant.generating
+                  : t.posterMaker.aiAssistant.button}
               </button>
             </div>
 
@@ -569,23 +603,23 @@ export default function PosterDesign() {
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                   <Palette className="h-4 w-4 text-[#ff8a65]" />
-                  <span>Style Preset</span>
+                  <span>{t.posterMaker.styleTitle}</span>
                 </div>
                 <span className="text-[12px] font-medium text-[#7c83ff]">
-                  Optional
+                  {t.logoMaker.optional}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {stylePresets.map((style) => (
                   <button
-                    key={style.title}
+                    key={style.id}
                     type="button"
-                    onClick={() => setSelectedStyle(style.title)}
+                    onClick={() => setSelectedStyle(style.id)}
                     className={`rounded-xl p-4 text-left transition hover:scale-[1.01] hover:shadow-sm ${
                       style.bg
                     } ${
-                      selectedStyle === style.title
+                      selectedStyle === style.id
                         ? "ring-2 ring-[#5d72ff]"
                         : "ring-1 ring-transparent"
                     }`}
@@ -605,19 +639,19 @@ export default function PosterDesign() {
             <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
               <div className="mb-4 flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                 <ImagePlus className="h-4 w-4 text-[#6b8eff]" />
-                <span>Output Format</span>
+                <span>{t.posterMaker.formatTitle}</span>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {outputFormats.map((format) => (
                   <button
-                    key={format.title}
+                    key={format.id}
                     type="button"
-                    onClick={() => setSelectedFormat(format)}
+                    onClick={() => setSelectedFormatId(format.id)}
                     className={`rounded-xl p-4 text-left transition hover:scale-[1.01] hover:shadow-sm ${
                       format.bg
                     } ${
-                      selectedFormat.title === format.title
+                      selectedFormatId === format.id
                         ? "ring-2 ring-[#5d72ff]"
                         : "ring-1 ring-transparent"
                     }`}
@@ -633,34 +667,27 @@ export default function PosterDesign() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setSelectedFormat({
-                      title: "Custom Size",
-                      description: "Enter your own dimensions",
-                      bg: "bg-[#f5f0ff]",
-                      value: "custom",
-                    })
-                  }
+                  onClick={() => setSelectedFormatId("custom")}
                   className={`col-span-1 rounded-xl p-4 text-left transition hover:scale-[1.01] hover:shadow-sm bg-[#f5f0ff] sm:col-span-2 ${
-                    selectedFormat.title === "Custom Size"
+                    selectedFormatId === "custom"
                       ? "ring-2 ring-[#5d72ff]"
                       : "ring-1 ring-transparent"
                   }`}
                 >
                   <h4 className="text-[14px] font-semibold text-[#3d4a54]">
-                    Custom Size
+                    {t.posterMaker.customSize.title}
                   </h4>
                   <p className="mt-1 text-[11px] text-[#7f8a93]">
-                    Enter your own width &amp; height
+                    {t.posterMaker.customSize.description}
                   </p>
                 </button>
               </div>
 
-              {selectedFormat.title === "Custom Size" && (
+              {selectedFormatId === "custom" && (
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <div>
                     <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                      Width (px)
+                      {t.posterMaker.customSize.width}
                     </label>
                     <input
                       name="width"
@@ -673,7 +700,7 @@ export default function PosterDesign() {
                   </div>
                   <div>
                     <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                      Height (px)
+                      {t.posterMaker.customSize.height}
                     </label>
                     <input
                       name="height"
@@ -692,14 +719,17 @@ export default function PosterDesign() {
             <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
               <div className="mb-4 flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                 <Sparkles className="h-4 w-4 text-[#4f79e8]" />
-                <span>Language</span>
+                <span>{t.posterMaker.languageTitle}</span>
               </div>
-              <div className="grid grid-cols-3 gap-2">
-                {languageOptions.map((lang) => (
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: "he", label: "עברית", value: "hebrew" },
+                  { id: "en", label: "English", value: "english" },
+                ].map((lang) => (
                   <button
                     key={lang.id}
                     type="button"
-                    onClick={() => setLanguage(lang.id)}
+                    onClick={() => setLanguage(lang.id as Language)}
                     className={`rounded-lg px-3 py-2.5 text-[12px] font-medium transition ${
                       language === lang.id
                         ? "bg-[#eef5ff] text-[#4f79e8] ring-1 ring-[#b7d0ff]"
@@ -717,17 +747,17 @@ export default function PosterDesign() {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h4 className="text-[13px] font-semibold text-[#6b63ff]">
-                    Credits used = Quantity selected
+                    {t.posterMaker.credits.title}
                   </h4>
                   <p className="mt-1 text-[11px] text-[#8a939a]">
-                    (e.g. 1 post = 1 credit, 3 posts = 3 credits).
+                    {t.posterMaker.credits.subtitle}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="flex flex-col items-end gap-1">
                     <label className="text-[10px] font-medium text-[#9aa1a8]">
-                      Variations
+                      {t.posterMaker.credits.variations}
                     </label>
                     <input
                       id="poster-variations"
@@ -780,14 +810,16 @@ export default function PosterDesign() {
               ) : (
                 <Sparkles className="h-4 w-4" />
               )}
-              {isGenerating ? "Generating..." : "Generate Poster"}
+              {isGenerating
+                ? t.posterMaker.generating
+                : t.posterMaker.generateButton}
             </button>
           </div>
 
           {/* RIGHT SIDE */}
           <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
             <div className="mb-3 text-[14px] font-medium text-[#6b7280]">
-              Preview Output
+              {t.posterMaker.previewTitle}
             </div>
 
             <div className="flex min-h-[420px] flex-col overflow-hidden rounded-2xl border border-[#dce6ef] bg-white sm:min-h-[520px] xl:min-h-[760px]">
@@ -826,9 +858,9 @@ export default function PosterDesign() {
                 <div className="border-t border-[#edf2f7] p-5">
                   <button
                     onClick={handleDownload}
-                    className="mb-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#4b8df8] py-3.5 text-[15px] font-semibold text-white transition hover:bg-[#3b7de8]"
+                    className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#4b8df8] py-3.5 text-[15px] font-semibold text-white transition hover:bg-[#3b7de8]"
                   >
-                    Download
+                    {t.posterMaker.download}
                     <Download className="h-4 w-4" />
                   </button>
 
@@ -862,6 +894,7 @@ export default function PosterDesign() {
       </div>
 
       <CustomizeBrandKit
+        language={language}
         isOpen={isBrandKitModalOpen}
         onClose={() => setIsBrandKitModalOpen(false)}
         brandName={brandName}

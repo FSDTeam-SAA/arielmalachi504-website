@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Type,
   Sparkles,
@@ -20,6 +20,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useInitiateLogo, useLogoResult } from "../hooks/useLogo";
+import { Language, useLanguageStore } from "@/store/language.store";
+import { translations } from "@/locales";
 
 type FormDataType = {
   brandName: string;
@@ -27,86 +29,81 @@ type FormDataType = {
   logoVision: string;
 };
 
-const industries = [
-  "Restaurant / Food",
-  "Fashion & Beauty",
-  "Technology",
-  "Fitness & Health",
-  "Real Estate",
-  "Education",
-  "Finance",
-  "Creative Agency",
-  "Retail / Shop",
-  "Other",
-];
-
-const logoStyles = [
-  {
-    title: "Wordmark",
-    subtitle: "Text-based logo",
-    icon: "Aa",
-    bg: "bg-[#e8f5f3]",
-  },
-  {
-    title: "Lettermark",
-    subtitle: "Initials only",
-    icon: "AB",
-    bg: "bg-[#fdeff4]",
-  },
-  {
-    title: "Icon + Text",
-    subtitle: "Symbol with name",
-    icon: "⚡ T",
-    bg: "bg-[#f4f8df]",
-  },
-  {
-    title: "Emblem",
-    subtitle: "Badge/seal style",
-    icon: "✹",
-    bg: "bg-[#fff4ec]",
-  },
-  {
-    title: "Abstract",
-    subtitle: "Geometric shape",
-    icon: "✦",
-    bg: "bg-[#e8f0ff]",
-  },
-  {
-    title: "Mascot",
-    subtitle: "Character-based",
-    icon: "◫",
-    bg: "bg-[#f7eef9]",
-  },
-];
-
-const palettePresets = [
-  {
-    name: "Ocean Blue",
-    colors: ["#2B50B8", "#4C8CF0", "#BFD8FF"],
-  },
-  {
-    name: "Sunset",
-    colors: ["#E52420", "#FF7A00", "#F3D35B"],
-  },
-  {
-    name: "Forest",
-    colors: ["#147A3D", "#2EBE5A", "#A8D94D"],
-  },
-  {
-    name: "Royal",
-    colors: ["#4C229A", "#7A56E0", "#C9BFF5"],
-  },
-  {
-    name: "Monochrome",
-    colors: ["#C40039", "#D93C7F", "#E765B2"],
-  },
-  {
-    name: "Dark Mono",
-    colors: ["#0F172A", "#6B7280", "#E5E7EB"],
-  },
-];
+// Move constants inside or use functions that return them localized
 
 export default function LogoDesign() {
+  const { language: globalLanguage } = useLanguageStore();
+  const [language, setLanguage] = useState<Language>(globalLanguage);
+
+  useEffect(() => {
+    setLanguage(globalLanguage);
+  }, [globalLanguage]);
+
+  const t = translations[language];
+
+  const industries = useMemo(
+    () => [
+      { id: "Restaurant / Food", label: t.logoMaker.industries.restaurant },
+      { id: "Fashion & Beauty", label: t.logoMaker.industries.fashion },
+      { id: "Technology", label: t.logoMaker.industries.technology },
+      { id: "Fitness & Health", label: t.logoMaker.industries.fitness },
+      { id: "Real Estate", label: t.logoMaker.industries.realEstate },
+      { id: "Education", label: t.logoMaker.industries.education },
+      { id: "Finance", label: t.logoMaker.industries.finance },
+      { id: "Creative Agency", label: t.logoMaker.industries.creative },
+      { id: "Retail / Shop", label: t.logoMaker.industries.retail },
+      { id: "Other", label: t.logoMaker.industries.other },
+    ],
+    [t],
+  );
+
+  const logoStyles = useMemo(
+    () => [
+      {
+        id: "Wordmark",
+        title: t.logoMaker.styles.wordmark.title,
+        subtitle: t.logoMaker.styles.wordmark.subtitle,
+        icon: "Aa",
+        bg: "bg-[#e8f5f3]",
+      },
+      {
+        id: "Lettermark",
+        title: t.logoMaker.styles.lettermark.title,
+        subtitle: t.logoMaker.styles.lettermark.subtitle,
+        icon: "AB",
+        bg: "bg-[#fdeff4]",
+      },
+      {
+        id: "Icon + Text",
+        title: t.logoMaker.styles.iconText.title,
+        subtitle: t.logoMaker.styles.iconText.subtitle,
+        icon: "⚡ T",
+        bg: "bg-[#f4f8df]",
+      },
+      {
+        id: "Emblem",
+        title: t.logoMaker.styles.emblem.title,
+        subtitle: t.logoMaker.styles.emblem.subtitle,
+        icon: "✹",
+        bg: "bg-[#fff4ec]",
+      },
+      {
+        id: "Abstract",
+        title: t.logoMaker.styles.abstract.title,
+        subtitle: t.logoMaker.styles.abstract.subtitle,
+        icon: "✦",
+        bg: "bg-[#e8f0ff]",
+      },
+      {
+        id: "Mascot",
+        title: t.logoMaker.styles.mascot.title,
+        subtitle: t.logoMaker.styles.mascot.subtitle,
+        icon: "◫",
+        bg: "bg-[#f7eef9]",
+      },
+    ],
+    [t],
+  );
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [generationId, setGenerationId] = useState<string | null>(null);
@@ -123,6 +120,42 @@ export default function LogoDesign() {
   const resultUrls: string[] = useMemo(
     () => resultData?.data?.resultUrls || [],
     [resultData],
+  );
+
+  const palettePresets = useMemo(
+    () => [
+      {
+        id: "Ocean Blue",
+        name: t.logoMaker.palettes.oceanBlue,
+        colors: ["#2B50B8", "#4C8CF0", "#BFD8FF"],
+      },
+      {
+        id: "Sunset",
+        name: t.logoMaker.palettes.sunset,
+        colors: ["#E52420", "#FF7A00", "#F3D35B"],
+      },
+      {
+        id: "Forest",
+        name: t.logoMaker.palettes.forest,
+        colors: ["#147A3D", "#2EBE5A", "#A8D94D"],
+      },
+      {
+        id: "Royal",
+        name: t.logoMaker.palettes.royal,
+        colors: ["#4C229A", "#7A56E0", "#C9BFF5"],
+      },
+      {
+        id: "Monochrome",
+        name: t.logoMaker.palettes.monochrome,
+        colors: ["#C40039", "#D93C7F", "#E765B2"],
+      },
+      {
+        id: "Dark Mono",
+        name: t.logoMaker.palettes.darkMono,
+        colors: ["#0F172A", "#6B7280", "#E5E7EB"],
+      },
+    ],
+    [t],
   );
   const [userSelectedLogoUrl, setUserSelectedLogoUrl] = useState<string | null>(
     null,
@@ -153,8 +186,6 @@ export default function LogoDesign() {
       console.error("Download failed:", error);
     }
   };
-
-  const [language, setLanguage] = useState("en");
 
   const [referenceImage, setReferenceImage] = useState<File | null>(null);
   const [referenceImagePreview, setReferenceImagePreview] = useState<
@@ -239,7 +270,7 @@ export default function LogoDesign() {
   };
 
   const handleGenerateLogo = () => {
-    const palette = palettePresets.find((p) => p.name === selectedPalette);
+    const palette = palettePresets.find((p) => p.id === selectedPalette);
     const paletteColors = palette ? palette.colors.join(",") : "";
 
     const enabledCustomColors = customColors.map((c) => c.color).join(",");
@@ -279,7 +310,9 @@ export default function LogoDesign() {
           >
             <ArrowLeft className="h-5 w-5 cursor-pointer" />
           </button>
-          <h1 className="text-[24px] font-bold text-[#1f2a44]">Logo Maker</h1>
+          <h1 className="text-[24px] font-bold text-[#1f2a44]">
+            {t.logoMaker.title}
+          </h1>
         </div>
 
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_1fr]">
@@ -355,34 +388,34 @@ export default function LogoDesign() {
             <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
               <div className="mb-4 flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                 <Type className="h-4 w-4 text-[#c185ff]" />
-                <span>Brand Information</span>
+                <span>{t.logoMaker.brandInfo}</span>
               </div>
 
               <div className="space-y-3">
                 <div>
                   <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                    Company / Brand Name
+                    {t.logoMaker.companyName}
                   </label>
                   <input
                     name="brandName"
                     value={formData.brandName}
                     onChange={handleInputChange}
                     type="text"
-                    placeholder="e.g. Marco's Pizza"
+                    placeholder={t.logoMaker.companyPlaceholder}
                     className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                   />
                 </div>
 
                 <div>
                   <label className="mb-1.5 block text-[11px] font-medium text-[#9aa1a8]">
-                    Tagline
+                    {t.logoMaker.tagline}
                   </label>
                   <input
                     name="tagline"
                     value={formData.tagline}
                     onChange={handleInputChange}
                     type="text"
-                    placeholder="e.g. Authentic Italian Taste"
+                    placeholder={t.logoMaker.taglinePlaceholder}
                     className="h-[42px] w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                   />
                 </div>
@@ -393,7 +426,7 @@ export default function LogoDesign() {
             <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
               <div className="mb-4 flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                 <Sparkles className="h-4 w-4 text-[#65d67f]" />
-                <span>Describe Your Logo Vision</span>
+                <span>{t.logoMaker.visionTitle}</span>
               </div>
 
               <div>
@@ -402,13 +435,13 @@ export default function LogoDesign() {
                   value={formData.logoVision}
                   onChange={handleInputChange}
                   rows={4}
-                  placeholder="e.g. A modern, sleek logo for an Italian pizza restaurant. Use warm red and orange tones. Include a pizza slice icon. The typography should be bold and welcoming. Make it suitable for social media profiles."
+                  placeholder={t.logoMaker.visionPlaceholder}
                   className="w-full rounded-lg border border-transparent bg-[#f6f7f9] px-3 py-3 text-[13px] text-[#555] outline-none transition placeholder:text-[#c0c4c9] focus:border-[#b8d2f3] focus:bg-white"
                 />
               </div>
 
               <p className="mt-3 text-[11px] text-[#8d9399]">
-                Be as specific as possible for best results.
+                {t.logoMaker.visionHint}
               </p>
             </div>
 
@@ -416,22 +449,22 @@ export default function LogoDesign() {
             <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
               <div className="mb-4 flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                 <Sparkles className="h-4 w-4 text-[#ff8a65]" />
-                <span>Industry</span>
+                <span>{t.logoMaker.industryTitle}</span>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 {industries.map((industry) => (
                   <button
-                    key={industry}
+                    key={industry.id}
                     type="button"
-                    onClick={() => setSelectedIndustry(industry)}
+                    onClick={() => setSelectedIndustry(industry.id)}
                     className={`rounded-lg px-3 py-2 text-[12px] transition ${
-                      selectedIndustry === industry
+                      selectedIndustry === industry.id
                         ? "bg-[#eef5ff] text-[#4f79e8] ring-1 ring-[#b7d0ff]"
                         : "bg-[#f7f7f7] text-[#848b92] hover:bg-[#f1f5f9]"
                     }`}
                   >
-                    {industry}
+                    {industry.label}
                   </button>
                 ))}
               </div>
@@ -440,7 +473,7 @@ export default function LogoDesign() {
             <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
               <div className="mb-4 flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                 <Languages className="h-4 w-4 text-[#4f79e8]" />
-                <span>Target Language</span>
+                <span>{t.logoMaker.targetLanguageTitle}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-3 cursor-pointer">
@@ -451,7 +484,9 @@ export default function LogoDesign() {
                   <button
                     key={lang.id}
                     type="button"
-                    onClick={() => setLanguage(lang.id)}
+                    onClick={() => {
+                      setLanguage(lang.id as Language);
+                    }}
                     className={`flex items-center justify-between rounded-xl p-3 px-4 transition cursor-pointer ${
                       language === lang.id
                         ? "bg-[#eef5ff] text-[#4f79e8] ring-1 ring-[#b7d0ff]"
@@ -479,23 +514,23 @@ export default function LogoDesign() {
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                   <Paintbrush className="h-4 w-4 text-[#c185ff]" />
-                  <span>Logo Style</span>
+                  <span>{t.logoMaker.styleTitle}</span>
                 </div>
                 <span className="text-[12px] font-medium text-[#b7bec6]">
-                  Optional
+                  {t.logoMaker.optional}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {logoStyles.map((style) => (
                   <button
-                    key={style.title}
+                    key={style.id}
                     type="button"
-                    onClick={() => setSelectedStyle(style.title)}
+                    onClick={() => setSelectedStyle(style.id)}
                     className={`rounded-xl p-4 text-left transition hover:scale-[1.01] hover:shadow-sm ${
                       style.bg
                     } ${
-                      selectedStyle === style.title
+                      selectedStyle === style.id
                         ? "ring-2 ring-[#5d72ff]"
                         : "ring-1 ring-transparent"
                     }`}
@@ -519,10 +554,10 @@ export default function LogoDesign() {
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[14px] font-medium text-[#6b7280]">
                   <Palette className="h-4 w-4 text-[#f265a8]" />
-                  <span>Color palette</span>
+                  <span>{t.logoMaker.paletteTitle}</span>
                 </div>
                 <span className="text-[12px] font-medium text-[#b7bec6]">
-                  Optional
+                  {t.logoMaker.optional}
                 </span>
               </div>
 
@@ -532,13 +567,13 @@ export default function LogoDesign() {
                     key={preset.name + preset.colors.join("")}
                     type="button"
                     onClick={() => {
-                      setSelectedPalette(preset.name);
+                      setSelectedPalette(preset.id);
                       setCustomColors(
                         preset.colors.map((c) => ({ color: c, hex: c })),
                       );
                     }}
                     className={`rounded-xl border bg-white p-3 text-left shadow-[0_6px_16px_rgba(44,87,140,0.04)] transition hover:shadow-[0_8px_18px_rgba(44,87,140,0.08)] ${
-                      selectedPalette === preset.name
+                      selectedPalette === preset.id
                         ? "border-[#8cb7ff] ring-2 ring-[#cfe0ff]"
                         : "border-[#dbe6f0]"
                     }`}
@@ -603,7 +638,7 @@ export default function LogoDesign() {
                       className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-dashed border-[#dbe6f0] py-4 text-[13px] font-medium text-[#7c8691] transition hover:border-[#4b8df8] hover:bg-[#f0f7ff] hover:text-[#4b8df8]"
                     >
                       <Plus className="h-4 w-4" />
-                      Add Another Color
+                      {t.logoMaker.addColor}
                     </button>
                   )}
                 </div>
@@ -634,14 +669,14 @@ export default function LogoDesign() {
               )}
               {isInitiating || generationStatus === "processing"
                 ? "Generating..."
-                : "Generate Logo"}
+                : t.logoMaker.generateButton}
             </button>
           </div>
 
           {/* RIGHT SIDE */}
           <div className="rounded-2xl border border-[#d7e7f3] bg-white p-4 shadow-[0_10px_25px_rgba(33,74,135,0.06)]">
             <div className="mb-4 text-[14px] font-medium text-[#6b7280]">
-              Preview Output
+              {t.logoMaker.previewTitle}
             </div>
 
             <div className="flex min-h-[420px] flex-col overflow-hidden rounded-2xl border border-[#dce6ef] bg-white sm:min-h-[520px] xl:min-h-[760px]">
@@ -666,10 +701,10 @@ export default function LogoDesign() {
                       <Palette className="h-8 w-8 opacity-40" />
                     </div>
                     <p className="text-[14px] font-medium text-[#8a8f96]">
-                      Your logo will appear here
+                      {t.logoMaker.emptyStateTitle}
                     </p>
                     <p className="mt-1 text-[12px] text-[#c0c4ca]">
-                      Enter your company name and click Generate
+                      {t.logoMaker.emptyStateText}
                     </p>
                   </div>
                 )}
@@ -682,13 +717,9 @@ export default function LogoDesign() {
                     onClick={handleDownload}
                     className="mb-4 flex w-full items-center justify-center gap-2 cursor-pointer rounded-xl bg-[#4b8df8] py-3.5 text-[15px] font-semibold text-white transition hover:bg-[#3b7de8]"
                   >
-                    Download
+                    {t.logoMaker.download}
                     <Download className="h-4 w-4" />
                   </button>
-
-                  {/* <p className="mb-6 text-center text-[13px] text-[#8a939a]">
-                                        You can regenerate this design up to 3 times.
-                                    </p> */}
 
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                     {resultUrls.map((url, idx) => (
@@ -729,10 +760,10 @@ export default function LogoDesign() {
               </div>
 
               <h3 className="text-[20px] font-bold text-[#1f2a44]">
-                Generating your logo
+                {t.logoMaker.generatingModalTitle}
               </h3>
               <p className="mt-2 text-[14px] text-[#6b7280]">
-                Our AI is crafting your brand identity...
+                {t.logoMaker.generatingModalText}
               </p>
 
               <div className="mt-8 overflow-hidden rounded-full bg-[#f1f5f9]">
@@ -740,7 +771,7 @@ export default function LogoDesign() {
               </div>
 
               <p className="mt-4 text-[12px] text-[#94a3b8]">
-                This usually takes about 30-60 seconds.
+                {t.logoMaker.generatingModalHint}
               </p>
             </div>
           </div>
