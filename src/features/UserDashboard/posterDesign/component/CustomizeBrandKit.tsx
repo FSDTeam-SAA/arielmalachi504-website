@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import {
   UploadCloud,
   ChevronDown,
@@ -12,16 +12,10 @@ import {
   Trash2,
 } from "lucide-react";
 import Image from "next/image";
+import { translations } from "@/locales";
+import { Language } from "@/store/language.store";
 
-const palettePresets = [
-  { name: "Ocean Blue", colors: ["#2B50B8", "#4C8CF0", "#BFD8FF"] },
-  { name: "Sunset", colors: ["#E52420", "#FF7A00", "#F3D35B"] },
-  { name: "Forest", colors: ["#147A3D", "#2EBE5A", "#A8D94D"] },
-  { name: "Royal", colors: ["#4C229A", "#7A56E0", "#C9BFF5"] },
-  { name: "Monochrome", colors: ["#C40039", "#D93C7F", "#E765B2"] },
-  { name: "Dark Mono", colors: ["#0F172A", "#6B7280", "#E5E7EB"] },
-];
-
+// Pre-localized constants
 const fontOptions = [
   "Plus Jakarta Sans",
   "Inter",
@@ -41,6 +35,7 @@ export default function CustomizeBrandKit({
   setTagLine,
   colors,
   setColors,
+  language: parentLanguage,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -50,14 +45,55 @@ export default function CustomizeBrandKit({
   setTagLine: (v: string) => void;
   colors: ColorEntry[];
   setColors: React.Dispatch<React.SetStateAction<ColorEntry[]>>;
+  language: Language;
 }) {
+  const t = translations[parentLanguage];
+
+  const palettePresets = useMemo(
+    () => [
+      {
+        id: "oceanBlue",
+        name: t.logoMaker.palettes.oceanBlue,
+        colors: ["#2B50B8", "#4C8CF0", "#BFD8FF"],
+      },
+      {
+        id: "sunset",
+        name: t.logoMaker.palettes.sunset,
+        colors: ["#E52420", "#FF7A00", "#F3D35B"],
+      },
+      {
+        id: "forest",
+        name: t.logoMaker.palettes.forest,
+        colors: ["#147A3D", "#2EBE5A", "#A8D94D"],
+      },
+      {
+        id: "royal",
+        name: t.logoMaker.palettes.royal,
+        colors: ["#4C229A", "#7A56E0", "#C9BFF5"],
+      },
+      {
+        id: "monochrome",
+        name: t.logoMaker.palettes.monochrome,
+        colors: ["#C40039", "#D93C7F", "#E765B2"],
+      },
+      {
+        id: "darkMono",
+        name: t.logoMaker.palettes.darkMono,
+        colors: ["#0F172A", "#6B7280", "#E5E7EB"],
+      },
+    ],
+    [t],
+  );
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
 
-  const [selectedPreset, setSelectedPreset] = useState("Ocean Blue");
-  const [language, setLanguage] = useState("Hebrew");
+  const [selectedPresetId, setSelectedPresetId] = useState("oceanBlue");
+  const [typographyLanguage, setTypographyLanguage] = useState(
+    parentLanguage === "he" ? "Hebrew" : "English",
+  );
   const [headlineFont, setHeadlineFont] = useState("Plus Jakarta Sans");
   const [subHeadlineFont, setSubHeadlineFont] = useState("Manrope");
 
@@ -92,7 +128,7 @@ export default function CustomizeBrandKit({
   };
 
   const handleApplyPreset = (preset: (typeof palettePresets)[0]) => {
-    setSelectedPreset(preset.name);
+    setSelectedPresetId(preset.id);
     setColors(preset.colors.map((c) => ({ color: c, hex: c })));
   };
 
@@ -103,8 +139,8 @@ export default function CustomizeBrandKit({
       { color: "#4C8CF0", hex: "#4C8CF0" },
       { color: "#E52420", hex: "#E52420" },
     ]);
-    setSelectedPreset("Ocean Blue");
-    setLanguage("Hebrew");
+    setSelectedPresetId("oceanBlue");
+    setTypographyLanguage(parentLanguage === "he" ? "Hebrew" : "English");
     setHeadlineFont("Plus Jakarta Sans");
     setSubHeadlineFont("Manrope");
     if (logoPreview) URL.revokeObjectURL(logoPreview);
@@ -119,7 +155,7 @@ export default function CustomizeBrandKit({
       brandName,
       tagLine,
       colors,
-      language,
+      typographyLanguage,
       headlineFont,
       subHeadlineFont,
       logoFile,
@@ -143,11 +179,10 @@ export default function CustomizeBrandKit({
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-[30px] font-bold text-[#1f2a44]">
-              Customize Brand Kit
+              {t.posterMaker.brandKit.modalTitle}
             </h1>
             <p className="mt-2 max-w-[620px] text-[15px] leading-6 text-[#6f7d8b]">
-              Define your visual identity. These settings will be automatically
-              applied to all your new designs and templates.
+              {t.posterMaker.brandKit.modalSubtitle}
             </p>
           </div>
 
@@ -158,25 +193,25 @@ export default function CustomizeBrandKit({
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-[14px] font-medium text-[#24324a]">
-                    Brand Name *
+                    {t.posterMaker.brandKit.brandName}
                   </label>
                   <input
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
                     type="text"
-                    placeholder="e.g. Marco's Pizza"
+                    placeholder={t.posterMaker.brandKit.brandNamePlaceholder}
                     className="h-[48px] w-full rounded-lg border border-transparent bg-white px-4 text-[14px] text-[#4b5563] outline-none ring-1 ring-[#e5edf4] focus:ring-[#8cb7ff]"
                   />
                 </div>
                 <div>
                   <label className="mb-2 block text-[14px] font-medium text-[#24324a]">
-                    Tag Line
+                    {t.posterMaker.brandKit.tagline}
                   </label>
                   <input
                     value={tagLine}
                     onChange={(e) => setTagLine(e.target.value)}
                     type="text"
-                    placeholder="Your tagline here"
+                    placeholder={t.posterMaker.brandKit.taglinePlaceholder}
                     className="h-[48px] w-full rounded-lg border border-transparent bg-white px-4 text-[14px] text-[#4b5563] outline-none placeholder:text-[#b7c0c9] ring-1 ring-[#e5edf4] focus:ring-[#8cb7ff]"
                   />
                 </div>
@@ -207,7 +242,7 @@ export default function CustomizeBrandKit({
                         onClick={() => fileInputRef.current?.click()}
                         className="rounded-lg bg-[#eef4ff] px-5 py-2 text-[13px] font-medium text-[#5b6eff] transition hover:bg-[#e3ecff]"
                       >
-                        Change Logo
+                        {t.posterMaker.brandKit.changeLogo}
                       </button>
                     </div>
                   ) : (
@@ -216,20 +251,20 @@ export default function CustomizeBrandKit({
                         <UploadCloud className="h-6 w-6 text-[#5d72ff]" />
                       </div>
                       <p className="text-[15px] font-medium text-[#5d72ff]">
-                        Upload Your Brand Logo (Optional)
+                        {t.posterMaker.brandKit.uploadLogoTitle}
                       </p>
                       <p className="mt-2 text-[11px] text-[#a0a8b0]">
-                        Recommended size: 2MB max
+                        {t.posterMaker.brandKit.uploadLogoHint}
                       </p>
                       <p className="mt-1 text-[11px] text-[#a0a8b0]">
-                        SVG or PNG, at least 500x500px
+                        {t.posterMaker.brandKit.uploadLogoSubhint}
                       </p>
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         className="mt-5 rounded-lg bg-[#f1f1f4] px-6 py-2.5 text-[13px] font-medium text-[#5d72ff] transition hover:bg-[#e8e8ee]"
                       >
-                        Browse
+                        {t.posterMaker.brandKit.browse}
                       </button>
                     </div>
                   )}
@@ -244,10 +279,10 @@ export default function CustomizeBrandKit({
                   <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#ffe7f3]">
                     <Palette className="h-4 w-4 text-[#f265a8]" />
                   </div>
-                  <span>Color Palette</span>
+                  <span>{t.posterMaker.brandKit.colorPalette}</span>
                 </div>
                 <span className="text-[12px] text-[#b7bec6]">
-                  Optional (max 5)
+                  {t.posterMaker.brandKit.optionalMax5}
                 </span>
               </div>
 
@@ -255,11 +290,11 @@ export default function CustomizeBrandKit({
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {palettePresets.map((preset) => (
                   <button
-                    key={preset.name + preset.colors.join("")}
+                    key={preset.id}
                     type="button"
                     onClick={() => handleApplyPreset(preset)}
                     className={`rounded-xl border bg-white p-3 text-left shadow-[0_6px_16px_rgba(44,87,140,0.04)] transition hover:shadow-[0_8px_18px_rgba(44,87,140,0.08)] ${
-                      selectedPreset === preset.name
+                      selectedPresetId === preset.id
                         ? "border-[#8cb7ff] ring-2 ring-[#cfe0ff]"
                         : "border-[#dbe6f0]"
                     }`}
@@ -283,7 +318,7 @@ export default function CustomizeBrandKit({
               {/* Custom Colors */}
               <div className="mt-4 rounded-xl border border-[#dbe6f0] bg-white p-4 shadow-[0_6px_16px_rgba(44,87,140,0.04)]">
                 <p className="mb-4 text-[14px] font-medium text-[#4b5563]">
-                  Custom Colors
+                  {t.posterMaker.brandKit.customColors}
                 </p>
 
                 <div className="flex flex-col gap-3">
@@ -308,10 +343,10 @@ export default function CustomizeBrandKit({
                         />
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-[#b0b8c1]">
                           {index === 0
-                            ? "PRIMARY"
+                            ? t.posterMaker.brandKit.primary
                             : index === 1
-                              ? "SECONDARY"
-                              : "HEX"}
+                              ? t.posterMaker.brandKit.secondary
+                              : t.posterMaker.brandKit.hex}
                         </div>
                       </div>
                       <button
@@ -332,7 +367,7 @@ export default function CustomizeBrandKit({
                       className="mt-1 flex items-center justify-center gap-2 rounded-xl border border-dashed border-[#dbe6f0] py-4 text-[13px] font-medium text-[#7c8691] transition hover:border-[#4b8df8] hover:bg-[#f0f7ff] hover:text-[#4b8df8]"
                     >
                       <Plus className="h-4 w-4" />
-                      Add Another Color
+                      {t.posterMaker.brandKit.addAnotherColor}
                     </button>
                   )}
                 </div>
@@ -344,18 +379,17 @@ export default function CustomizeBrandKit({
           <div className="mt-5 rounded-2xl border border-[#d8e4ef] bg-white p-4 shadow-[0_8px_20px_rgba(44,87,140,0.04)] md:p-5">
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-[16px] font-semibold text-[#24324a]">
-                Brand Typography
+                {t.posterMaker.brandKit.typographyTitle}
               </h2>
 
               <div className="relative w-full sm:w-[130px]">
                 <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
+                  value={typographyLanguage}
+                  onChange={(e) => setTypographyLanguage(e.target.value)}
                   className="h-[42px] w-full appearance-none rounded-lg border border-[#e2e9f0] bg-[#f8fafc] px-4 text-[13px] text-[#4b5563] outline-none"
                 >
-                  <option>Hebrew</option>
-                  <option>English</option>
-                  {/* <option>Arabic</option> */}
+                  <option value="Hebrew">Hebrew</option>
+                  <option value="English">English</option>
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8793]" />
               </div>
@@ -364,7 +398,7 @@ export default function CustomizeBrandKit({
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div>
                 <label className="mb-2 block text-[14px] font-medium text-[#24324a]">
-                  Headline / Title
+                  {t.posterMaker.brandKit.headlineTitle}
                 </label>
                 <div className="relative mb-3">
                   <select
@@ -387,7 +421,7 @@ export default function CustomizeBrandKit({
 
               <div>
                 <label className="mb-2 block text-[14px] font-medium text-[#24324a]">
-                  Sub-Headline
+                  {t.posterMaker.brandKit.subHeadlineTitle}
                 </label>
                 <div className="relative mb-3">
                   <select
@@ -416,7 +450,7 @@ export default function CustomizeBrandKit({
               onClick={handleDiscard}
               className="rounded-xl border border-[#74d0ff] bg-[#eef8ff] px-6 py-3 text-[14px] font-medium text-[#3aa4f8] transition hover:bg-[#e4f4ff]"
             >
-              Discard Changes
+              {t.posterMaker.brandKit.discard}
             </button>
             <button
               type="button"
@@ -424,7 +458,7 @@ export default function CustomizeBrandKit({
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2ac8f4] to-[#5d72ff] px-6 py-3 text-[14px] font-medium text-white shadow-[0_10px_20px_rgba(80,130,255,0.18)] transition hover:opacity-95"
             >
               <Save className="h-4 w-4" />
-              Save Brand Kit
+              {t.posterMaker.brandKit.save}
             </button>
           </div>
         </div>
