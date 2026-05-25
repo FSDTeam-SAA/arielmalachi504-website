@@ -16,7 +16,11 @@ import {
 } from "lucide-react";
 import { useTranslation } from "@/locales";
 
-export default function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export default function Sidebar({ onClose }: SidebarProps) {
   const { t } = useTranslation();
   const pathname = usePathname();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -55,8 +59,8 @@ export default function Sidebar() {
         className="w-full h-full bg-white border-l border-gray-100 flex flex-col py-8 px-4"
       >
         {/* Logo */}
-        <div className="flex justify-center mb-10">
-          <Link href="/">
+        <div className="relative flex justify-center mb-10">
+          <Link href="/" onClick={onClose}>
             <Image
               src="/images/logo.png"
               alt="Craftad Logo"
@@ -65,6 +69,15 @@ export default function Sidebar() {
               className="h-auto w-auto"
             />
           </Link>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Navigation Links */}
@@ -76,6 +89,7 @@ export default function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={onClose}
                 className={`flex items-center gap-3 px-4 py-4 rounded-xl transition-all duration-300 ${
                   isActive
                     ? "bg-[#3B82F6] text-white shadow-md shadow-blue-500/20"

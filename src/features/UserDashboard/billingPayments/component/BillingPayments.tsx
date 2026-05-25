@@ -1,10 +1,23 @@
 "use client";
 
-import { CreditCard, CalendarDays, Coins, CheckCircle2 } from "lucide-react";
-import { useUserProfile } from "../hooks/useBillingPayments";
+import {
+  CreditCard,
+  CalendarDays,
+  Coins,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
+import {
+  useUserProfile,
+  useSubscribeToPlan,
+} from "../hooks/useBillingPayments";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { isAxiosError } from "axios";
 import {
   getSubscriptionPlans,
   ISubscriptionPlan,
@@ -13,6 +26,37 @@ import {
 export default function BillingPayments() {
   const { data: profileResponse, isLoading, isError } = useUserProfile();
   const profile = profileResponse?.data;
+  const { status } = useSession();
+  const router = useRouter();
+  const subscribeMutation = useSubscribeToPlan();
+
+  const handleSubscribe = async (planId: string) => {
+    if (status === "unauthenticated") {
+      toast.error("Please login to purchase a plan");
+      router.push("/login");
+      return;
+    }
+
+    subscribeMutation.mutate(planId, {
+      onSuccess: (response) => {
+        if (response?.data?.sessionUrl) {
+          window.location.href = response.data.sessionUrl;
+        } else {
+          toast.success("Successfully subscribed!");
+          router.push("/dashboard-overview");
+        }
+      },
+      onError: (error: unknown) => {
+        if (isAxiosError(error)) {
+          toast.error(
+            error.response?.data?.message || "Failed to initiate payment",
+          );
+        } else {
+          toast.error("An unexpected error occurred");
+        }
+      },
+    });
+  };
 
   const [plans, setPlans] = useState<ISubscriptionPlan[]>([]);
   const [plansLoading, setPlansLoading] = useState<boolean>(true);
@@ -153,6 +197,8 @@ export default function BillingPayments() {
                   buttonText="Generate Your Design"
                   highlighted={index === 1}
                   badge={index === 1 ? "Most Popular" : undefined}
+                  onSubscribe={() => handleSubscribe(plan._id)}
+                  isPending={subscribeMutation.isPending}
                 />
               ))}
             </div>
@@ -204,6 +250,8 @@ interface PlanCardProps {
   highlighted?: boolean;
   badge?: string;
   credits: number;
+  onSubscribe: () => void;
+  isPending: boolean;
 }
 
 function PlanCard({
@@ -216,6 +264,8 @@ function PlanCard({
   buttonText,
   highlighted = false,
   badge,
+  onSubscribe,
+  isPending,
 }: PlanCardProps) {
   return (
     <div
@@ -295,14 +345,23 @@ function PlanCard({
       </div>
 
       <button
+        onClick={onSubscribe}
+        disabled={isPending}
         className={[
-          "mt-8 h-12 w-full rounded-lg text-sm font-medium transition-all duration-300",
+          "mt-8 h-12 w-full rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed",
           highlighted
             ? "bg-white text-[#4f46e5] hover:bg-white/90"
             : "bg-gradient-to-r from-[#11c5df] to-[#5d74f8] text-white hover:opacity-95",
         ].join(" ")}
       >
-        {buttonText}
+        {isPending ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          buttonText
+        )}
       </button>
     </div>
   );
